@@ -1,0 +1,578 @@
+// ar (العربية): the words of Osysharp.PageBuilder, translated.
+// Written and kept in step with the source by `osy translate`: a new text arrives as `=> null`, a text
+// whose source changed keeps its old translation in a `was` clause. The words are yours to edit.
+// Source language: en.
+
+translations ar {
+  // ── InTheMail ──
+  /// InTheMail · text on the page
+  /// placeholders: {spoken} = spoken (string)
+  /// shown through InTheMail()
+  text "In the mail {spoken}" => "في الرسالة {spoken}";
+
+  // ── PagesDesk ──
+  /// PagesDesk · a control's name for screen readers
+  accessibleName "Look" => "المظهر";
+  /// PagesDesk · a control's name for screen readers
+  accessibleName "Mails" => "الرسائل";
+  /// PagesDesk · a control's name for screen readers
+  /// beside: "As of", "With drafts", "Stop previewing"
+  accessibleName "Open the site" => "فتح الموقع";
+  /// PagesDesk · a control's name for screen readers
+  accessibleName "Preview the whole site" => "معاينة الموقع كاملًا";
+  /// PagesDesk · a control's name for screen readers
+  accessibleName "Regions" => "المناطق";
+  /// PagesDesk · a control's name for screen readers
+  /// beside: "It is live from the morning of its first date until the morning of its last."
+  accessibleName "Schedule" => "الجدول الزمني";
+  /// PagesDesk · a control's name for screen readers
+  accessibleName "The site's frame" => "إطار الموقع";
+  /// PagesDesk · a control's name for screen readers
+  accessibleName "Theme" => "السمة";
+  /// PagesDesk · a control's name for screen readers
+  /// beside: "Pages"
+  accessibleName "Versions" => "الإصدارات";
+  /// PagesDesk · a control's name for screen readers
+  accessibleName "What will not come along" => "ما لن يُنقل معه";
+  /// PagesDesk · a button's label · at most ~13 characters
+  /// shown through Button.label
+  button "Arrange" => "ترتيب";
+  /// PagesDesk · a button's label · at most ~12 characters
+  /// shown through Button.label
+  /// beside: "16rem", "Make the copy"
+  /// also in PagesRegionEditor
+  /// also in PagesInspector
+  /// also in PagesMenuEditor
+  button "Cancel" => "إلغاء";
+  /// PagesDesk · a button's label · at most ~10 characters
+  /// shown through Button.label
+  button "Edit" => "تعديل";
+  /// PagesDesk · a button's label · at most ~21 characters
+  /// placeholders: {LookName} = LookName(…) (string)
+  /// shown through Button.label
+  button "Keep {LookName}" => "إبقاء {LookName}";
+  /// PagesDesk · a button's label · at most ~23 characters
+  /// shown through Button.label
+  /// beside: "Live from", "Live until", "Save the schedule"
+  button "Make it live now" => "نشره الآن";
+  /// PagesDesk · a button's label · at most ~19 characters
+  /// shown through Button.label
+  /// beside: "16rem", "Cancel"
+  button "Make the copy" => "إنشاء النسخة";
+  /// PagesDesk · a button's label · at most ~19 characters
+  /// shown through Button.label
+  /// beside: "16rem"
+  button "Make the page" => "إنشاء الصفحة";
+  /// PagesDesk · a button's label · at most ~14 characters
+  /// shown through Button.label
+  button "New page" => "صفحة جديدة";
+  /// PagesDesk · a button's label · at most ~17 characters
+  /// shown through Button.label
+  button "New version" => "إصدار جديد";
+  /// PagesDesk · a button's label · at most ~31 characters
+  /// placeholders: {current.Name} = current.Name (string)
+  /// shown through Button.label
+  /// beside: "As of", "With drafts", "Open the site", "Stop previewing"
+  button "Preview {current.Name}" => "معاينة {current.Name}";
+  /// PagesDesk · a button's label · at most ~24 characters
+  /// shown through Button.label
+  /// beside: "Live from", "Live until", "Make it live now"
+  button "Save the schedule" => "حفظ الجدول الزمني";
+  /// PagesDesk · a button's label · at most ~21 characters
+  /// shown through Button.label
+  /// beside: "As of", "With drafts", "Open the site"
+  button "Stop previewing" => "إيقاف المعاينة";
+  /// PagesDesk · a button's label · at most ~28 characters
+  /// placeholders: {LookName} = LookName(…) (string)
+  /// shown through Button.label
+  button "Switch to {LookName}" => "التبديل إلى {LookName}";
+  /// PagesDesk · a button's label · at most ~15 characters
+  /// shown through Button.label
+  /// beside: "Wears"
+  button "The theme" => "السمة";
+  /// PagesDesk · a hint under a field
+  /// placeholders: {current.Name} = current.Name (string)
+  /// shown through Field.hint
+  hint "A copy of {current.Name}, unpublished." => "نسخة من {current.Name}، غير منشورة.";
+  /// PagesDesk · a label (a field, a list item, a menu entry) · at most ~33 characters
+  /// shown through Field.label
+  label "Address of the new page" => "عنوان الصفحة الجديدة";
+  /// PagesDesk · a label (a field, a list item, a menu entry) · at most ~11 characters
+  /// shown through DatePicker.label
+  /// beside: "With drafts", "Open the site", "Stop previewing"
+  label "As of" => "في تاريخ";
+  /// PagesDesk · a label (a field, a list item, a menu entry) · at most ~15 characters
+  /// shown through DatePicker.label
+  /// beside: "Live until", "Save the schedule", "Make it live now"
+  label "Live from" => "منشور من";
+  /// PagesDesk · a label (a field, a list item, a menu entry) · at most ~16 characters
+  /// shown through DatePicker.label
+  /// beside: "Live from", "Save the schedule", "Make it live now"
+  label "Live until" => "منشور حتى";
+  /// PagesDesk · a label (a field, a list item, a menu entry) · at most ~33 characters
+  /// shown through Field.label
+  label "Name of the new version" => "اسم الإصدار الجديد";
+  /// PagesDesk · a label (a field, a list item, a menu entry) · at most ~17 characters
+  /// shown through Switch.label
+  /// beside: "As of", "Open the site", "Stop previewing"
+  label "With drafts" => "مع المسودات";
+  /// PagesDesk · placeholder text inside an empty field · at most ~15 characters
+  /// shown through Field.placeholder
+  placeholder "Christmas" => "عيد الميلاد";
+  /// PagesDesk · placeholder text inside an empty field · at most ~11 characters
+  /// shown through DatePicker.placeholder
+  /// beside: "With drafts", "Open the site", "Stop previewing"
+  placeholder "Today" => "اليوم";
+  /// PagesDesk · placeholder text inside an empty field · at most ~21 characters
+  /// shown through Field.placeholder
+  placeholder "christmas-gifts" => "christmas-gifts";
+  /// PagesDesk · a subtitle
+  /// shown through PageHead.subtitle
+  /// beside: "Versions"
+  subtitle "What each page shows, in which version of the site, and when." => "ما تعرضه كل صفحة، وفي أي إصدار من الموقع، ومتى.";
+  /// PagesDesk · text on the page
+  text "A list of links, on every page" => "قائمة روابط في كل صفحة";
+  /// PagesDesk · text on the page
+  /// shown through EmptyState.body
+  text "A page gets one with `Region(\"name\", allow: [...])` in its code." => "تحصل الصفحة على منطقة عبر `Region(\"name\", allow: [...])` في شيفرتها.";
+  /// PagesDesk · text on the page
+  /// shown through SectionLabel.text
+  text "Around every page" => "حول كل صفحة";
+  /// PagesDesk · text on the page
+  /// beside: "Schedule"
+  text "It is live from the morning of its first date until the morning of its last." => "يكون منشورًا من صباح تاريخه الأول حتى صباح تاريخه الأخير.";
+  /// PagesDesk · text on the page
+  text "Look" => "المظهر";
+  /// PagesDesk · text on the page
+  text "On every page" => "في كل صفحة";
+  /// PagesDesk · text on the page
+  text "Open the site" => "فتح الموقع";
+  /// PagesDesk · text on the page
+  /// shown through SectionLabel.text
+  /// beside: "New version"
+  text "Versions of the site" => "إصدارات الموقع";
+  /// PagesDesk · text on the page
+  /// beside: "The theme"
+  text "Wears" => "يستخدم";
+  /// PagesDesk · text on the page
+  /// shown through SectionLabel.text
+  text "What each mail says" => "ما تقوله كل رسالة";
+  /// PagesDesk · text on the page
+  /// shown through SectionLabel.text
+  text "What each page shows" => "ما تعرضه كل صفحة";
+  /// PagesDesk · text on the page
+  text "these" => "هذه الكتل";
+  /// PagesDesk · text on the page
+  text "this" => "هذه الكتلة";
+  /// PagesDesk · text on the page
+  /// placeholders: {LookName} = LookName(…) (string), {value} = … (string)
+  text "{LookName} has no design for {value}. They stay in the arrangement and are not shown while the version wears it:" => "لا يتضمن {LookName} تصميمًا يناسب {value}، فتبقى في الترتيب ولا تظهر ما دام الإصدار يستخدم هذا المظهر:";
+  /// PagesDesk · a title
+  /// shown through EmptyState.title
+  title "No regions yet" => "لا توجد مناطق بعد";
+  /// PagesDesk · a title
+  /// shown through PageHead.title
+  /// beside: "Versions"
+  title "Pages" => "الصفحات";
+
+  // ── PagesInspector ──
+  /// PagesInspector · a control's name for screen readers
+  accessibleName "Dates" => "التواريخ";
+  /// PagesInspector · a control's name for screen readers
+  /// placeholders: {p.Label} = p.Label (string)
+  accessibleName "The {p.Label} field" => "حقل {p.Label}";
+  /// PagesInspector · a control's name for screen readers
+  /// placeholders: {p.Label} = p.Label (string)
+  /// beside: "Use these words"
+  accessibleName "{p.Label} — the editor" => "محرر {p.Label}";
+  /// PagesInspector · a control's name for screen readers
+  /// placeholders: {spec.Label} = spec.Label (string)
+  accessibleName "{spec.Label}: its fields" => "حقول {spec.Label}";
+  /// PagesInspector · an image's description for screen readers
+  alt "The uploaded picture" => "الصورة المرفوعة";
+  /// PagesInspector · a button's label · at most ~12 characters
+  /// shown through Button.label
+  /// also in PagesMenuEditor
+  button "Change" => "تغيير";
+  /// PagesInspector · a button's label · at most ~9 characters
+  /// shown through Button.label
+  /// beside: "On"
+  button "Off" => "إيقاف";
+  /// PagesInspector · a button's label · at most ~8 characters
+  /// shown through Button.label
+  /// beside: "Off"
+  button "On" => "تشغيل";
+  /// PagesInspector · a button's label · at most ~20 characters
+  /// shown through Button.label
+  /// beside: "Shows from", "Shows until"
+  button "Save the dates" => "حفظ التواريخ";
+  /// PagesInspector · a button's label · at most ~21 characters
+  /// shown through Button.label
+  /// beside: "Cancel"
+  button "Use these words" => "استخدام هذا النص";
+  /// PagesInspector · a hint under a field
+  /// shown through Field.hint
+  /// beside: "Save"
+  hint "A page of the shop, like /coffee, or https://…" => "صفحة من المتجر مثل /coffee، أو https://…";
+  /// PagesInspector · a hint under a field
+  /// placeholders: {p.MaxLength} = p.MaxLength (int) — {p.MaxLength} is a count: give one text per plural form
+  /// shown through Field.hint
+  /// beside: "Save"
+  hint "At most {p.MaxLength} characters." => { zero: "الحد الأقصى للأحرف: {p.MaxLength}.", one: "الحد الأقصى للأحرف: {p.MaxLength}.", two: "الحد الأقصى للأحرف: {p.MaxLength}.", few: "{p.MaxLength} أحرف كحد أقصى.", many: "{p.MaxLength} حرفًا كحد أقصى.", other: "{p.MaxLength} حرف كحد أقصى." };
+  /// PagesInspector · a label (a field, a list item, a menu entry) · at most ~16 characters
+  /// shown through DatePicker.label
+  /// beside: "Shows until", "Save the dates"
+  /// also in PagesMenuEditor
+  label "Shows from" => "تظهر من";
+  /// PagesInspector · a label (a field, a list item, a menu entry) · at most ~17 characters
+  /// shown through DatePicker.label
+  /// beside: "Shows from", "Save the dates"
+  /// also in PagesMenuEditor
+  label "Shows until" => "تظهر حتى";
+  /// PagesInspector · placeholder text inside an empty field · at most ~33 characters
+  /// shown through DatePicker.placeholder
+  /// beside: "Shows from", "Save the dates"
+  placeholder "For as long as the page" => "ما دامت الصفحة موجودة";
+  /// PagesInspector · placeholder text inside an empty field · at most ~20 characters
+  /// shown through DatePicker.placeholder
+  /// beside: "Shows until", "Save the dates"
+  /// also in PagesMenuEditor
+  placeholder "From the start" => "من البداية";
+  /// PagesInspector · text on the page
+  /// beside: "When it shows", "Shows from"
+  text "It is gone from the morning of its last date." => "تختفي من صباح تاريخها الأخير.";
+  /// PagesInspector · text on the page
+  /// beside: "Shows from", "It is gone from the morning of its last date."
+  text "When it shows" => "متى تظهر";
+  /// PagesInspector · text on the page
+  /// placeholders: {p.MaxLength} = p.MaxLength (int) — {p.MaxLength} is a count: give one text per plural form
+  /// beside: "16rem", "Use these words"
+  text "Written in Markdown — at most {p.MaxLength} characters." => { zero: "مكتوب بـ Markdown. الحد الأقصى للأحرف: {p.MaxLength}.", one: "مكتوب بـ Markdown. الحد الأقصى للأحرف: {p.MaxLength}.", two: "مكتوب بـ Markdown. الحد الأقصى للأحرف: {p.MaxLength}.", few: "مكتوب بـ Markdown، بحد أقصى {p.MaxLength} أحرف.", many: "مكتوب بـ Markdown، بحد أقصى {p.MaxLength} حرفًا.", other: "مكتوب بـ Markdown، بحد أقصى {p.MaxLength} حرف." };
+  /// PagesInspector · text on the page
+  /// beside: "16rem", "Use these words"
+  text "Written in Markdown." => "مكتوب بـ Markdown.";
+  /// PagesInspector · text on the page
+  /// placeholders: {p.Label} = p.Label (string)
+  text "{p.Label} (optional)" => "{p.Label} (اختياري)";
+
+  // ── PagesMailPreview ──
+  /// PagesMailPreview · a control's name for screen readers
+  accessibleName "Preview of the mail" => "معاينة الرسالة";
+  /// PagesMailPreview · a control's name for screen readers
+  accessibleName "Show the mail" => "عرض الرسالة";
+  /// PagesMailPreview · a control's name for screen readers
+  accessibleName "The mail's plain text" => "النص العادي للرسالة";
+  /// PagesMailPreview · a button's label · at most ~16 characters
+  /// shown through Button.label
+  /// beside: "Phone", "Wide"
+  button "Plain text" => "نص عادي";
+  /// PagesMailPreview · text on the page
+  /// shown through EmptyState.body
+  text "The mail is previewed for something real — once there is one (an order), it shows here." => "تُعاين الرسالة على بيانات حقيقية. بمجرد وجود واحدة (طلب)، تظهر هنا.";
+  /// PagesMailPreview · a title
+  /// shown through EmptyState.title
+  title "Nothing to show it with yet" => "لا يوجد ما تُعرض به بعد";
+
+  // ── PagesMenuEditor ──
+  /// PagesMenuEditor · a control's name for screen readers
+  accessibleName "A new entry" => "عنصر جديد";
+  /// PagesMenuEditor · a control's name for screen readers
+  accessibleName "Change the entry" => "تعديل العنصر";
+  /// PagesMenuEditor · a control's name for screen readers
+  /// placeholders: {title} = title (string)
+  accessibleName "Editing {title}" => "تعديل {title}";
+  /// PagesMenuEditor · a control's name for screen readers
+  /// placeholders: {value} = … (int), {MenuValue} = MenuValue(…) (string) — {value} is a count: give one text per plural form
+  accessibleName "Entry {value}: {MenuValue}" => { zero: "العنصر {value}: {MenuValue}", one: "العنصر {value}: {MenuValue}", two: "العنصر {value}: {MenuValue}", few: "العنصر {value}: {MenuValue}", many: "العنصر {value}: {MenuValue}", other: "العنصر {value}: {MenuValue}" };
+  /// PagesMenuEditor · a control's name for screen readers
+  /// beside: "Publish"
+  accessibleName "The menu's entries" => "عناصر القائمة";
+  /// PagesMenuEditor · a button's label · at most ~18 characters
+  /// shown through Button.label
+  button "Add an entry" => "إضافة عنصر";
+  /// PagesMenuEditor · a button's label · at most ~12 characters
+  /// shown through Button.label
+  /// beside: "Cancel"
+  button "Add it" => "إضافة";
+  /// PagesMenuEditor · a button's label · at most ~10 characters
+  /// shown through Button.label
+  /// beside: "Change", "Take out"
+  button "Hide" => "إخفاء";
+  /// PagesMenuEditor · a button's label · at most ~13 characters
+  /// shown through Button.label
+  button "Move in" => "إدخال";
+  /// PagesMenuEditor · a button's label · at most ~14 characters
+  /// shown through Button.label
+  button "Move out" => "إخراج";
+  /// PagesMenuEditor · a button's label · at most ~10 characters
+  /// shown through Button.label
+  /// beside: "Change", "Take out"
+  button "Show" => "إظهار";
+  /// PagesMenuEditor · a hint under a field
+  /// shown through Field.hint
+  /// beside: "Words", "Shows from", "Save"
+  hint "A page of the shop, like /coffee, or an outside address, https://…" => "صفحة من المتجر مثل /coffee، أو عنوان خارجي https://…";
+  /// PagesMenuEditor · a hint under a field
+  /// shown through Field.hint
+  /// beside: "Words of the new entry", "Add it"
+  hint "A page of the shop, or an outside address, https://…" => "صفحة من المتجر، أو عنوان خارجي https://…";
+  /// PagesMenuEditor · a hint under a field
+  /// shown through Field.hint
+  /// beside: "Goes to", "Shows from", "Save"
+  hint "At most 60 characters." => "60 حرفًا كحد أقصى.";
+  /// PagesMenuEditor · a label (a field, a list item, a menu entry) · at most ~18 characters
+  /// shown through Badge.label
+  label "Another site" => "موقع آخر";
+  /// PagesMenuEditor · a label (a field, a list item, a menu entry) · at most ~13 characters
+  /// shown through Field.label
+  /// beside: "Words", "Shows from", "Save"
+  label "Goes to" => "ينتقل إلى";
+  /// PagesMenuEditor · a label (a field, a list item, a menu entry) · at most ~12 characters
+  /// shown through Badge.label
+  label "Hidden" => "مخفي";
+  /// PagesMenuEditor · a label (a field, a list item, a menu entry) · at most ~16 characters
+  /// shown through Field.label
+  /// beside: "Words of the new entry", "Add it"
+  label "It goes to" => "ينتقل إلى";
+  /// PagesMenuEditor · a label (a field, a list item, a menu entry) · at most ~11 characters
+  /// shown through Field.label
+  /// beside: "Goes to", "Shows from", "Save"
+  label "Words" => "النص";
+  /// PagesMenuEditor · a label (a field, a list item, a menu entry) · at most ~31 characters
+  /// shown through Field.label
+  /// beside: "It goes to", "Add it"
+  label "Words of the new entry" => "نص العنصر الجديد";
+  /// PagesMenuEditor · placeholder text inside an empty field · at most ~26 characters
+  /// shown through Field.placeholder
+  /// beside: "Words of the new entry", "Add it"
+  placeholder "/c/christmas-gifts" => "/c/christmas-gifts";
+  /// PagesMenuEditor · placeholder text inside an empty field · at most ~21 characters
+  /// shown through Field.placeholder
+  /// beside: "It goes to", "Add it"
+  placeholder "Christmas gifts" => "هدايا عيد الميلاد";
+  /// PagesMenuEditor · placeholder text inside an empty field · at most ~33 characters
+  /// shown through DatePicker.placeholder
+  /// beside: "Shows from"
+  placeholder "For as long as the menu" => "ما دامت القائمة موجودة";
+  /// PagesMenuEditor · text on the page
+  text "Opens the entries inside it" => "يفتح العناصر التي بداخله";
+  /// PagesMenuEditor · text on the page
+  text "The menu is empty — add an entry." => "القائمة فارغة. أضف عنصرًا.";
+
+  // ── PagesPictureUpload ──
+  /// PagesPictureUpload · text on the page
+  text "Upload a photograph…" => "رفع صورة…";
+
+  // ── PagesPreview ──
+  /// PagesPreview · a control's name for screen readers
+  accessibleName "Preview" => "المعاينة";
+  /// PagesPreview · a button's label · at most ~11 characters
+  /// shown through Button.label
+  /// beside: "Wide"
+  /// also in PagesMailPreview
+  button "Phone" => "هاتف";
+  /// PagesPreview · a button's label · at most ~10 characters
+  /// shown through Button.label
+  /// beside: "Phone"
+  /// also in PagesMailPreview
+  button "Wide" => "عريض";
+  /// PagesPreview · a hint under a field
+  /// shown through Field.hint
+  hint "Type the address of one of these pages." => "اكتب عنوان إحدى هذه الصفحات.";
+  /// PagesPreview · a label (a field, a list item, a menu entry) · at most ~10 characters
+  /// shown through Field.label
+  label "Page" => "الصفحة";
+
+  // ── PagesRegionEditor ──
+  /// PagesRegionEditor · a control's name for screen readers
+  accessibleName "Add a block" => "إضافة كتلة";
+  /// PagesRegionEditor · a control's name for screen readers
+  /// placeholders: {t.Label} = t.Label (string)
+  /// beside: "7.5rem"
+  accessibleName "Add {t.Label}" => "إضافة {t.Label}";
+  /// PagesRegionEditor · a control's name for screen readers
+  /// placeholders: {title} = title (string)
+  accessibleName "Arranging {title}" => "ترتيب {title}";
+  /// PagesRegionEditor · a control's name for screen readers
+  /// also in PagesMenuEditor
+  accessibleName "Before it can go live" => "قبل أن يُنشر";
+  /// PagesRegionEditor · a control's name for screen readers
+  /// placeholders: {value} = … (int), {b.Label} = b.Label (string) — {value} is a count: give one text per plural form
+  accessibleName "Block {value}: {b.Label}" => { zero: "الكتلة {value}: {b.Label}", one: "الكتلة {value}: {b.Label}", two: "الكتلة {value}: {b.Label}", few: "الكتلة {value}: {b.Label}", many: "الكتلة {value}: {b.Label}", other: "الكتلة {value}: {b.Label}" };
+  /// PagesRegionEditor · a control's name for screen readers
+  accessibleName "Blocks" => "الكتل";
+  /// PagesRegionEditor · a control's name for screen readers
+  /// placeholders: {b.Label} = b.Label (string)
+  /// beside: "Up"
+  accessibleName "Fill in {b.Label}" => "تعبئة {b.Label}";
+  /// PagesRegionEditor · a button's label · at most ~17 characters
+  /// shown through Button.label
+  button "Add a block" => "إضافة كتلة";
+  /// PagesRegionEditor · a button's label · at most ~31 characters
+  /// shown through Button.label
+  /// beside: "Publish", "Throw the draft away"
+  /// also in PagesMenuEditor
+  button "Back to the code's own" => "العودة إلى ما في الشيفرة";
+  /// PagesRegionEditor · a button's label · at most ~10 characters
+  /// shown through Button.label
+  /// beside: "Up"
+  /// also in PagesMenuEditor
+  button "Down" => "لأسفل";
+  /// PagesRegionEditor · a button's label · at most ~13 characters
+  /// shown through Button.label
+  /// beside: "Throw the draft away", "Back to the code's own"
+  /// also in PagesMenuEditor
+  button "Publish" => "نشر";
+  /// PagesRegionEditor · a button's label · at most ~14 characters
+  /// shown through Button.label
+  /// also in PagesMenuEditor
+  button "Take out" => "إزالة";
+  /// PagesRegionEditor · a button's label · at most ~28 characters
+  /// shown through Button.label
+  /// beside: "Publish", "Back to the code's own"
+  /// also in PagesMenuEditor
+  button "Throw the draft away" => "تجاهل المسودة";
+  /// PagesRegionEditor · a button's label · at most ~8 characters
+  /// shown through Button.label
+  /// beside: "Down"
+  /// also in PagesMenuEditor
+  button "Up" => "لأعلى";
+  /// PagesRegionEditor · a label (a field, a list item, a menu entry) · at most ~21 characters
+  /// shown through Badge.label
+  /// also in PagesMenuEditor
+  label "Changed in code" => "تغيّر في الشيفرة";
+  /// PagesRegionEditor · a label (a field, a list item, a menu entry) · at most ~11 characters
+  /// shown through Badge.label
+  /// also in PagesMenuEditor
+  label "Dated" => "مؤقت";
+  /// PagesRegionEditor · a label (a field, a list item, a menu entry) · at most ~28 characters
+  /// shown through Badge.label
+  label "No longer in the app" => "لم يعد في التطبيق";
+  /// PagesRegionEditor · a label (a field, a list item, a menu entry) · at most ~11 characters
+  /// shown through Badge.label
+  label "Stays" => "دائم";
+  /// PagesRegionEditor · note
+  /// shown through note
+  note "Published — customers see it while this version is live." => "تم النشر، ويراه العملاء ما دام هذا الإصدار منشورًا.";
+  /// PagesRegionEditor · text on the page
+  /// also in PagesMenuEditor
+  text "A draft: nobody sees it until you publish it." => "مسودة: لن يراها أحد حتى تنشرها.";
+  /// PagesRegionEditor · text on the page
+  /// beside: "Cancel"
+  text "Add a block" => "إضافة كتلة";
+  /// PagesRegionEditor · text on the page
+  /// shown through EmptyState.body
+  text "Add one — this region shows nothing until you do." => "أضف كتلة، فهذه المنطقة لا تعرض شيئًا حتى تفعل.";
+  /// PagesRegionEditor · text on the page
+  /// also in PagesMenuEditor
+  text "Words in" => "النصوص بلغة";
+  /// PagesRegionEditor · a title
+  /// shown through EmptyState.title
+  title "No blocks" => "لا توجد كتل";
+
+  // ── PagesUploadPicture ──
+  /// PagesUploadPicture · text on the page
+  /// shown through PagesUploadPicture()
+  text "A picture is a JPEG, a PNG or a WebP." => "يجب أن تكون الصورة بصيغة JPEG أو PNG أو WebP.";
+
+  // ── PreviewSentence ──
+  /// PreviewSentence · text on the page
+  /// placeholders: {version} = version (string)
+  /// shown through PreviewSentence()
+  text "Previewing {version} as it is now" => "معاينة {version} كما هو الآن";
+  /// PreviewSentence · text on the page
+  /// placeholders: {version} = version (string)
+  /// shown through PreviewSentence()
+  text "Previewing {version} as it is now, with drafts" => "معاينة {version} كما هو الآن، مع المسودات";
+  /// PreviewSentence · text on the page
+  /// placeholders: {version} = version (string), {day} = day (string)
+  /// shown through PreviewSentence()
+  text "Previewing {version} as of {day}" => "معاينة {version} كما سيكون في {day}";
+  /// PreviewSentence · text on the page
+  /// placeholders: {version} = version (string), {day} = day (string)
+  /// shown through PreviewSentence()
+  text "Previewing {version} as of {day}, with drafts" => "معاينة {version} كما سيكون في {day}، مع المسودات";
+
+  // ── RegionState ──
+  /// RegionState · a label (a field, a list item, a menu entry) · at most ~14 characters
+  /// shown through RegionState()
+  label "Arranged" => "مُرتَّبة";
+  /// RegionState · a label (a field, a list item, a menu entry) · at most ~26 characters
+  /// shown through RegionState()
+  label "As the code has it" => "كما في الشيفرة";
+  /// RegionState · a label (a field, a list item, a menu entry) · at most ~27 characters
+  /// shown through RegionState()
+  label "Draft not published" => "مسودة غير منشورة";
+
+  // ── SaveBar ──
+  /// SaveBar · a button's label · at most ~10 characters
+  /// shown through Button.label
+  /// beside: "Unsaved changes", "Discard"
+  /// also in PagesInspector
+  /// also in PagesMenuEditor
+  button "Save" => "حفظ";
+
+  // ── SaveBlock ──
+  /// SaveBlock · text on the page
+  /// also in PagesUploadPicture
+  text "Only a draft can be changed — open the region to edit it." => "لا يمكن تعديل إلا المسودة. افتح المنطقة لتعديلها.";
+
+  // ── SiteLook ──
+  /// SiteLook · a control's name for screen readers
+  accessibleName "Site preview" => "معاينة الموقع";
+  /// SiteLook · a button's label · at most ~30 characters
+  /// shown through Button.label
+  /// beside: "Only you see this. Orders and payments are off while you preview."
+  button "Back to the live site" => "العودة إلى الموقع المنشور";
+  /// SiteLook · text on the page
+  /// beside: "Back to the live site"
+  text "Only you see this. Orders and payments are off while you preview." => "أنت وحدك ترى هذا. الطلبات والمدفوعات متوقفة أثناء المعاينة.";
+
+  // ── StorefrontBagPanel ──
+  /// StorefrontBagPanel · a button's label · at most ~11 characters
+  /// shown through IconButton.label
+  /// also in StorefrontMenuDrawer
+  /// also in PagesRegionEditor
+  /// also in PagesMenuEditor
+  button "Close" => "إغلاق";
+
+  // ── VersionSentence ──
+  /// VersionSentence · a subtitle
+  /// shown through VersionSentence()
+  subtitle "Customers see this version whenever no scheduled version is live." => "يرى العملاء هذا الإصدار كلما لم يكن هناك إصدار مجدول منشور.";
+  /// VersionSentence · a subtitle
+  /// placeholders: {from} = from (string), {until} = until (string)
+  /// shown through VersionSentence()
+  subtitle "Live from {from} until {until}." => "منشور من {from} حتى {until}.";
+  /// VersionSentence · a subtitle
+  /// placeholders: {from} = from (string)
+  /// shown through VersionSentence()
+  subtitle "Live from {from}." => "منشور من {from}.";
+  /// VersionSentence · a subtitle
+  /// shown through VersionSentence()
+  subtitle "Not live — only staff previewing it see it." => "غير منشور، ولا يراه إلا أعضاء الفريق الذين يعاينونه.";
+
+  // ── VersionState ──
+  /// VersionState · a button's label · at most ~10 characters
+  /// shown through VersionState()
+  button "Live" => "منشور";
+  /// VersionState · a button's label · at most ~14 characters
+  /// shown through VersionState()
+  button "Live now" => "منشور الآن";
+  /// VersionState · a button's label · at most ~14 characters
+  /// shown through VersionState()
+  button "Not live" => "غير منشور";
+  /// VersionState · a button's label · at most ~15 characters
+  /// shown through VersionState()
+  button "Scheduled" => "مجدول";
+
+  // ── WhereItIs ──
+  /// WhereItIs · text on the page
+  /// placeholders: {page} = page (string)
+  /// shown through WhereItIs()
+  text "On {page}" => "في {page}";
+  /// WhereItIs · text on the page
+  /// placeholders: {page} = page (string)
+  /// shown through WhereItIs()
+  text "One page per address — {page}" => "صفحة لكل عنوان: {page}";
+}

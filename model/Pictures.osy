@@ -1,0 +1,26 @@
+// A photograph staff upload for a block — copied into the app's PUBLIC file store (`public/pages/…`), where every
+// visitor may fetch it, and saved as the block's `Picture`: its address.
+//
+// ⚑ THE GATE IS THE DRAFT. The picture is written only for a placed block the caller can read in a DRAFT — which only
+//   the staff the app grants the page tables to can — so a signed-in customer cannot use this to put files on the
+//   shop's public store.
+
+namespace Osysharp.PageBuilder;
+
+using Osysharp.Blocks;
+using Osysharp.Storage;
+
+/// Puts an uploaded photograph on `param` of a placed block: copied into the public store and saved as the block's
+/// picture. Answers why not, or "".
+public string PagesUploadPicture(Guid placedId, string param, string uploadedPath) {
+  var placed = PlacedBlock.Include(b => b.Arrangement).Single(b => b.Id == placedId);
+  if (placed.Arrangement.Stage != ArrangementStage.Draft) { return "Only a draft can be changed — open the region to edit it."; }
+  var dot = uploadedPath.LastIndexOf('.');
+  var ext = dot < 0 ? ".jpg" : uploadedPath.Substring(dot).ToLower();
+  if (ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".webp") {
+    return "A picture is a JPEG, a PNG or a WebP.";
+  }
+  var path = $"public/pages/{Security.RandomHex(10)}{ext}";
+  File.WriteAllBytes(path, File.ReadAllBytes(uploadedPath));
+  return SaveBlockValue(placedId, Session.Language, new BlockValue { Name = param, Text = File.Url(path) });
+}

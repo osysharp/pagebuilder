@@ -1,0 +1,188 @@
+// A café whose staff arrange its pages. Two blocks of its own, a front page with a region, and campaign pages that are
+// a region each.
+
+using Osysharp.Blocks;
+using Osysharp.PageBuilder;
+
+theme Cafe {
+  Colors {
+    Espresso = "#2B1A12";
+    Bean = "#2B1A12";          // the same brown under a second name — offered once, as Espresso
+    Crema = "#E9C9A0";         // the ground a shelf note is set on
+    Foam = Modes.Of(light: "#F4EDE4", christmas: "#E8F0E6");
+    Berry = Modes.Of(light: "#B3263E", christmas: "#1F6B3A");
+  }
+}
+
+[Role] public enum AppRole { Authenticator, Member, Staff }
+
+[Principal]
+public entity Member {
+  [Required, Unique, MaxLength(255)] string Email;
+  [MaxLength(200)] string PasswordHash;
+  security {
+    allow read when IsAuthenticated where Id == user.Id;
+    allow read when IsStaff;
+    allow read, create when IsAuthenticator;
+    deny read PasswordHash when !IsAuthenticator;
+  }
+}
+
+[RoleGrant] public entity RoleGrant {
+  [Required] Member Member;
+  [Required] AppRole Role;
+  security { allow read when IsAuthenticated; allow create when IsAuthenticator; }
+}
+
+policy IsStaff => RoleGrant.Any(g => g.Member == user && g.Role == AppRole.Staff);
+policy IsAuthenticator => RoleGrant.Any(g => g.Member == user && g.Role == AppRole.Authenticator);
+
+[AuthMethod]
+public string SignIn(string email, string password) {
+  var m = Member.Where(x => x.Email == email).FirstOrDefault();
+  if (m == null) { Security.VerifyPassword(password); return ""; }
+  return Security.VerifyPassword(password, m.PasswordHash) ? Security.IssueJwt(m.Id, m.Email) : "";
+}
+
+app.Auth = new PasswordAuth { LoginField = Email, PasswordField = PasswordHash };
+app.AuthBootstrap = new AuthBootstrap { Role = AppRole.Authenticator, Login = SignIn };
+
+// The pages are staff's to arrange — the one question Osysharp.Blocks asks the app.
+policy ArrangesPages => IsStaff;
+
+/// A shelf of the café's things.
+public entity Shelf {
+  [Required, MaxLength(80), Translatable] string Name;
+  security { allow read when IsAnonymous || IsAuthenticated; allow create, update when IsStaff; }
+}
+
+public enum Weight { Light, Bold }
+
+/// A headline over a photograph.
+[Block("Headline")]
+component Headline([Label("Headline"), MaxLength(80)] string title, [Label("Words under it"), Hint("A sentence or two.")] Markdown body = "",
+    Picture photo = Textures.ChemexPour, Color ground = Colors.Foam, Weight weight = Weight.Bold, PageLink link = "/menu") {
+  render {
+    Box(display: Display.Grid, cols: "minmax(0, 1fr) minmax(0, 1fr)", bg: ground, label: "Headline") {
+      Image(picture: photo, alt: title, w: "100%", h: "100%", minH: "280px", objectFit: ObjectFit.Cover);
+      Stack(gap: 3, p: 8, justify: Justify.Center) {
+        Text(title, fontSize: FontSize.Title, fontWeight: weight == Weight.Bold ? FontWeight.Bold : FontWeight.Regular, color: Colors.Espresso);
+        Markdown(body);
+        Link(href: link) { Text("See the menu", color: Colors.Berry, fontWeight: FontWeight.Semibold); }
+      }
+    }
+  }
+}
+
+/// What is on one shelf, in a sentence.
+[Block("Shelf note")]
+component ShelfNote(Shelf? shelf, [Label("Words"), MaxLength(120)] string note = "On the shelf today") {
+  render {
+    Row(gap: 2, p: 6, bg: Colors.Crema, label: "Shelf note") {
+      Text(note + ":", fontWeight: FontWeight.Semibold);
+      Text(shelf != null ? shelf.Name : "nothing yet");
+    }
+  }
+}
+
+[Layout]
+[Composable]
+component Site() {
+  render {
+    Stack(gap: 0) {
+      SiteLook();
+      Outlet;
+    }
+  }
+}
+
+[Route("/")]
+[Layout(Site)]
+[AllowAnonymous]
+component Front() {
+  render {
+    Stack(gap: 0) {
+      Text("The Corner Café", fontSize: FontSize.Heading, fontWeight: FontWeight.Bold, p: 4);
+      Region("front", allow: [Headline, ShelfNote]) {
+        Headline(title: "Coffee roasted on Tuesdays", body: "Come in for a cup.");
+        ShelfNote(note: "On the shelf today");
+      }
+    }
+  }
+}
+
+[Route("/menu")]
+[Layout(Site)]
+[AllowAnonymous]
+component Menu() {
+  render { Text("The menu", p: 4); }
+}
+
+/// A campaign page: one region per address, arranged at the desk.
+[Route("/c/{slug}")]
+[Layout(Site)]
+[AllowAnonymous]
+component Campaign(string slug) {
+  live var page = RegionArrangement.Where(a => a.Region == "campaign" && a.Key == slug).ToList();
+  render {
+    if (page.Count == 0) {
+      EmptyState("This page is not here", body: "It may have ended, or never started.");
+    } else {
+      Region("campaign", key: slug, allow: [Headline, ShelfNote]) {
+        Headline(title: "Something new");
+      }
+    }
+  }
+}
+
+/// A live query filtered on a PROPERTY of a component parameter (`r.Name`, `v.Id`).
+[Composable]
+component ArrangedCount(RegionSpec r, SiteVersion v) {
+  live var mine = RegionArrangement.Where(a => a.Region == r.Name && a.Version.Id == v.Id).ToList();
+  render { Text($"{r.Name}: {mine.Count} arranged", label: "Arranged count"); }
+}
+
+[Route("/staff/probe")]
+[Layout(Site)]
+[Authorize(IsStaff)]
+component ProbePage() {
+  List<RegionSpec> regions = [];
+  SiteVersion? main = null;
+  on mount { regions = SiteRegions(); main = MainVersion(); }
+  render {
+    Stack(gap: 2, p: 6) {
+      if (main != null) {
+        foreach (var r in regions.Where(x => x.Name == "front")) { ArrangedCount(r, main); }
+      }
+    }
+  }
+}
+
+[Route("/staff/pages")]
+[Layout(Site)]
+[Authorize(IsStaff)]
+component StaffPages() {
+  render { Box(p: 6) { PagesDesk(); } }
+}
+
+[Route("/sign-in")]
+[Layout(Site)]
+[AllowAnonymous]
+component SignInPage() {
+  string email = "";
+  string password = "";
+  string problem = "";
+  action Go() {
+    var ticket = SignIn(email, password);
+    if (ticket == "") { problem = "That did not match."; return; }
+    Session.SignIn(ticket);
+    Navigation.Go("/staff/pages");
+  }
+  render {
+    Stack(gap: 3, p: 6, maxW: "24rem") {
+      Field("Email", value: email);
+      Field("Password", value: password, type: "password", error: problem);
+      Button("Sign in", onPress: Go, tone: Tone.Primary);
+    }
+  }
+}

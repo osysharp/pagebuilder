@@ -1,0 +1,17 @@
+// Osysharp.PageBuilder — the desk staff arrange an app's pages at: the site's versions (Everyday, Christmas…),
+// each region's blocks — added, moved, filled in and published — beside the real page at a phone's width or a wide
+// screen's, a whole-site preview as a version would look on a date, and the banner that says so on every page.
+//
+// The mechanism is the platform's (`[Block]`, `Region`, `Osysharp.Blocks`); this is the desk over it.
+package Osysharp.PageBuilder {
+  version "0.2.1";
+  minPlatform "0.9.0";
+  summary     "the page desk: arrange each Region's blocks with generated forms and a live preview, site versions on a schedule, and a staff preview of the whole site.";
+  model "model/**/*.osy";
+  use Osysharp.Ui;
+  use Osysharp.Blocks;
+  use Osysharp.Storage;
+  use Osysharp.Markdown;
+  use Osysharp.MarkdownEditor@1;
+  tests "tests";
+}

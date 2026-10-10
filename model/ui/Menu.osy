@@ -1,0 +1,198 @@
+// The MENU at the page desk — a list of links, edited as a list: each entry's words and where it goes,
+// in order, hidden or shown, inside the entry above it or not, dated if it should come and go by itself. A menu is a
+// region under the hood (`SiteMenu(…)` in the layout), so it has everything a region has — versions of the site,
+// a draft nobody sees, publish, words in each language, the preview of the whole site — without being arranged as
+// blocks: nobody needs a picture of a link to decide where it goes.
+
+namespace Osysharp.PageBuilder;
+
+using Osysharp.Blocks;
+
+/// The menu of one version of the site, being edited: its entries in order beside the live page, and the draft
+/// published when it is right. Opening it makes a draft (from what is live, or from the code's own list) and starts a
+/// preview with drafts for this browser, so the page beside it shows the draft as it changes.
+[Composable]
+public component PagesMenuEditor(Guid versionId, string region, Action onClose) {
+  Guid? draftId = null;
+  DraftView? draft = null;
+  string language = "";
+  string note = "";
+  bool noteIsProblem = false;
+  // The entry being changed (its words, where it goes, its dates), or null.
+  Guid? editing = null;
+  string words = "";
+  string to = "";
+  DateOnly? from = null;
+  DateOnly? until = null;
+  // A new entry being written.
+  bool adding = false;
+  string newWords = "";
+  string newTo = "";
+
+  on mount {
+    language = Session.Language;
+    draftId = EditRegion(versionId, region, "");
+    StartSitePreview(versionId, null, true);
+    Reload();
+  }
+
+  action Reload() { if (draftId != null) { draft = DraftOf(draftId.Value, language); } }
+  action InLanguage(string l) { language = l; editing = null; Reload(); }
+  action Tell(string said, bool problem) { note = said; noteIsProblem = problem; }
+
+  action Edit(DraftBlockView b) {
+    adding = false;
+    editing = editing == b.Id ? null : b.Id;
+    words = MenuValue(b, "label");
+    to = MenuValue(b, "to");
+    from = b.ShowFrom == null ? null : DateOnly.FromDateTime(b.ShowFrom.Value);
+    until = b.ShowUntil == null ? null : DateOnly.FromDateTime(b.ShowUntil.Value);
+    Tell("", false);
+  }
+  action Save(DraftBlockView b) {
+    var refusal = SaveBlock(b.Id, language, [new BlockValue { Name = "label", Text = words }, new BlockValue { Name = "to", Text = to }],
+      from == null ? null : from.Value.ToDateTime(TimeOnly.MinValue), until == null ? null : until.Value.ToDateTime(TimeOnly.MinValue));
+    if (refusal != "") { Tell(refusal, true); return; }
+    editing = null;
+    Tell("", false);
+    Reload();
+  }
+  action Flip(DraftBlockView b, string field) {
+    var refusal = SaveBlockValue(b.Id, language, new BlockValue { Name = field, Text = (MenuValue(b, field) != "true").ToString().ToLower() });
+    if (refusal != "") { Tell(refusal, true); return; }
+    Reload();
+  }
+  action Move(DraftBlockView b, int by) { MoveBlock(b.Id, by); Reload(); }
+  action Remove(DraftBlockView b) {
+    RemoveBlock(b.Id);
+    if (editing == b.Id) { editing = null; }
+    Reload();
+  }
+  action StartAdding() { adding = true; editing = null; newWords = ""; newTo = ""; Tell("", false); }
+  action StopAdding() { adding = false; }
+  action Add() {
+    var placed = AddBlock(draftId!.Value, MenuLinkBlock(), draft!.Blocks.Count);
+    var refusal = SaveBlock(placed, language, [new BlockValue { Name = "label", Text = newWords }, new BlockValue { Name = "to", Text = newTo }],
+      null, null);
+    if (refusal != "") {
+      // Nothing half-made is left in the menu: the entry goes again, and the words stay in the fields to be put right.
+      RemoveBlock(placed);
+      Tell(refusal, true);
+      Reload();
+      return;
+    }
+    adding = false;
+    Tell("", false);
+    Reload();
+  }
+  action Publish() {
+    var refusal = PublishRegion(draftId!.Value);
+    if (refusal != "") { Tell(refusal, true); Reload(); return; }
+    Tell("Published — customers see this menu while this version is live.", false);
+    draftId = EditRegion(versionId, region, "");
+    Reload();
+  }
+  action Discard() { DiscardDraft(draftId!.Value); onClose(); }
+  action BackToCode() { ResetRegion(versionId, region, ""); onClose(); }
+
+  render {
+    var title = Words(region);
+    Stack(gap: 4, label: $"Editing {title}") {
+      Row(justify: Justify.Between, align: Align.Center, gap: 3, wrap: Wrapping.Wrap) {
+        Stack(gap: 1) {
+          Text(draft == null ? title : $"{title} — {draft.Version}", fontSize: FontSize.Heading, fontWeight: FontWeight.Semibold);
+          Text("A draft: nobody sees it until you publish it.", color: Colors.TextMuted, fontSize: FontSize.Label);
+        }
+        Row(gap: 2, align: Align.Center, wrap: Wrapping.Wrap) {
+          if (App.Languages.Count > 1) {
+            Text("Words in", color: Colors.TextMuted, fontSize: FontSize.Label);
+            foreach (var l in App.Languages) {
+              Button(l.ToUpper(), onPress: () => InLanguage(l), size: Size.Sm, tone: l == language ? Tone.Primary : Tone.Ghost);
+            }
+          }
+          Button("Close", onPress: onClose, size: Size.Sm, tone: Tone.Ghost);
+        }
+      }
+      if (note != "") { Alert(note, tone: noteIsProblem ? Tone.Danger : Tone.Success); }
+      if (draft != null) {
+        Box(display: Display.Grid, cols: "repeat(auto-fit, minmax(22rem, 1fr))", gap: 6, align: Align.Start) {
+          Stack(gap: 3) {
+            Stack(gap: 0, role: UiRole.List, label: "The menu's entries", borderW: 1, border: Colors.Border, rounded: Radius.Md, bg: Colors.Surface) {
+              if (draft.Blocks.Count == 0) { Box(p: 4) { Text("The menu is empty — add an entry.", color: Colors.TextMuted); } }
+              foreach (var b in draft.Blocks) {
+                var inside = MenuValue(b, "inside") == "true";
+                var hidden = MenuValue(b, "hidden") == "true";
+                Stack(gap: 0, role: UiRole.ListItem, label: $"Entry {b.Position + 1}: {MenuValue(b, "label")}", borderBW: 1, border: Colors.Border) {
+                  Row(justify: Justify.Between, align: Align.Center, gap: 2, px: 3, py: 2, pl: inside ? 8 : 3, wrap: Wrapping.Wrap) {
+                    Stack(gap: 0, minW: "0") {
+                      Text(Said(MenuValue(b, "label")), fontWeight: FontWeight.Semibold, color: hidden ? Colors.TextMuted : Colors.OnSurface,
+                           textDecoration: hidden ? TextDecoration.LineThrough : TextDecoration.None);
+                      Text(MenuValue(b, "to") == "" ? "Opens the entries inside it" : Said(MenuValue(b, "to")), fontFamily: Font.Mono,
+                           fontSize: FontSize.Label, color: Colors.TextMuted);
+                    }
+                    Row(gap: 1, align: Align.Center, wrap: Wrapping.Wrap) {
+                      if (hidden) { Badge("Hidden", tone: Tone.Warning); }
+                      if (IsWebAddress(MenuValue(b, "to"))) { Badge("Another site", tone: Tone.Default); }
+                      if (b.ShowFrom != null || b.ShowUntil != null) { Badge("Dated", tone: Tone.Default); }
+                      if (b.Changed) { Badge("Changed in code", tone: Tone.Warning); }
+                      Button("Change", onPress: () => Edit(b), size: Size.Sm, tone: Tone.Ghost);
+                      Button(hidden ? "Show" : "Hide", onPress: () => Flip(b, "hidden"), size: Size.Sm, tone: Tone.Ghost);
+                      if (b.Position > 0) {
+                        Button(inside ? "Move out" : "Move in", onPress: () => Flip(b, "inside"), size: Size.Sm, tone: Tone.Ghost);
+                      }
+                      if (b.Position > 0) { Button("Up", onPress: () => Move(b, -1), size: Size.Sm, tone: Tone.Ghost); }
+                      if (b.Position < draft.Blocks.Count - 1) { Button("Down", onPress: () => Move(b, 1), size: Size.Sm, tone: Tone.Ghost); }
+                      Button("Take out", onPress: () => Remove(b), size: Size.Sm, tone: Tone.Ghost);
+                    }
+                  }
+                  if (editing == b.Id) {
+                    Stack(gap: 3, px: 3, py: 3, borderTW: 1, border: Colors.Border, label: "Change the entry") {
+                      Field("Words", value: words, hint: "At most 60 characters.");
+                      Field("Goes to", value: to, hint: "A page of the shop, like /coffee, or an outside address, https://…");
+                      Row(gap: 3, align: Align.End, wrap: Wrapping.Wrap) {
+                        DatePicker("Shows from", value: from, clearable: true, placeholder: "From the start");
+                        DatePicker("Shows until", value: until, clearable: true, placeholder: "For as long as the menu");
+                      }
+                      Row(gap: 2) {
+                        Button("Save", onPress: () => Save(b), size: Size.Sm, tone: Tone.Primary);
+                        Button("Cancel", onPress: () => Edit(b), size: Size.Sm, tone: Tone.Ghost);
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            if (adding) {
+              Stack(gap: 3, p: 3, borderW: 1, border: Colors.Border, rounded: Radius.Md, label: "A new entry") {
+                Field("Words of the new entry", value: newWords, placeholder: "Christmas gifts");
+                Field("It goes to", value: newTo, placeholder: "/c/christmas-gifts", hint: "A page of the shop, or an outside address, https://…");
+                Row(gap: 2) {
+                  Button("Add it", onPress: Add, size: Size.Sm, tone: Tone.Primary);
+                  Button("Cancel", onPress: StopAdding, size: Size.Sm, tone: Tone.Ghost);
+                }
+              }
+            } else {
+              Row { Button("Add an entry", onPress: StartAdding); }
+            }
+            if (draft.Problems.Count > 0) {
+              Stack(gap: 1, label: "Before it can go live") {
+                foreach (var p in draft.Problems) { Text(p, fontSize: FontSize.Label, color: Colors.Danger); }
+              }
+            }
+            Row(gap: 2, wrap: Wrapping.Wrap) {
+              Button("Publish", onPress: Publish, tone: Tone.Primary);
+              Button("Throw the draft away", onPress: Discard);
+              Button("Back to the code's own", onPress: BackToCode, tone: Tone.Ghost);
+            }
+          }
+          PagesPreview("/");
+        }
+      }
+    }
+  }
+}
+
+/// An entry's value of `name` — "" when it has none.
+string MenuValue(DraftBlockView b, string name) {
+  return b.Values.FirstOrDefault(v => v.Name == name)?.Text ?? "";
+}

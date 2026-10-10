@@ -1,0 +1,53 @@
+// The words of a `Markdown` field, being written — the same editor the mail desk gives staff for a mail's words
+// (`Osysharp.MarkdownEditor`), over a scratch row of the person writing them. Saving puts the words into the placed
+// block through `SaveBlockValue`, which checks them against the block's parameter and is governed by the app's own grant
+// on `PlacedValue` — so the scratch row decides nothing about the page: it is only somewhere for the editor to type.
+
+namespace Osysharp.PageBuilder;
+
+using Osysharp.Blocks;
+
+/// A `Markdown` field's words while one person writes them, in one language. Theirs alone; gone once saved.
+public entity PagesWordsDraft {
+  [CreatedBy] Guid? CreatedBy;
+  [Required] Guid Placed;
+  [Required, MaxLength(80)] string Param;
+  [Required, MaxLength(35)] string Language;
+  Markdown Body;
+  security {
+    allow create when IsAuthenticated;
+    allow read, update, delete when IsAuthenticated where CreatedBy == user;
+  }
+}
+
+/// A scratch row holding `words` for the editor — the field `param` of placed block `placedId`, in `language`. Answers
+/// its id.
+public Guid OpenPagesWords(Guid placedId, string param, string language, string words) {
+  var draft = PagesWordsDraft.Where(d => d.Placed == placedId && d.Param == param && d.Language == language).FirstOrDefault();
+  if (draft == null) {
+    draft = new PagesWordsDraft { Placed = placedId, Param = param, Language = language };
+    // The row first: its document's right to exist IS the right to that row, and a row still in this unit of work is
+    // not one that rule can find yet.
+    UnitOfWork.Commit();
+  }
+  draft.Body = words;
+  UnitOfWork.Commit();
+  return draft.Id;
+}
+
+/// Saves what the editor holds into the placed block — checked like any value of it. Answers why not, or "" once saved
+/// (and the scratch row is gone).
+public string SavePagesWords(Guid draftId) {
+  var draft = PagesWordsDraft.Single(d => d.Id == draftId);
+  var refusal = SaveBlockValue(draft.Placed, draft.Language, new BlockValue { Name = draft.Param, Text = $"{draft.Body}".Trim() });
+  if (refusal != "") { return refusal; }
+  draft.Delete();
+  UnitOfWork.Commit();
+  return "";
+}
+
+/// Puts the editor away without saving.
+public void DropPagesWords(Guid draftId) {
+  foreach (var d in PagesWordsDraft.Where(d => d.Id == draftId).ToList()) { d.Delete(); }
+  UnitOfWork.Commit();
+}

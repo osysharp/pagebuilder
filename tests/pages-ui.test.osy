@@ -1,0 +1,290 @@
+// The desk on screen: staff add a block and publish it and a customer sees it; a draft a customer never sees; the
+// Christmas version previewed as of a December date, banner and palette; and a switch on a schedule. `osy test --pixels`
+// photographs each step into osy-shots/.
+
+using Osysharp.Blocks;
+using Osysharp.PageBuilder;
+
+[Test(Cafe)]
+void staff_add_a_block_and_publish_it_and_a_customer_sees_it() {
+  Ui.Viewport(1440, 900);
+  Ui.SignInAs(Anna);
+  Ui.Visit("/staff/pages");
+  Assert.Visible("Versions of the site");
+  Assert.Visible("As the code has it", within: "Front");
+  Ui.Shot("the desk: versions and regions");
+  Ui.Click("Arrange", within: "Front");
+  Assert.Visible("Coffee roasted on Tuesdays");
+  Ui.Click("Add a block", within: "Blocks");
+  Ui.Click("Add Shelf note");
+  Ui.Click("Change", within: "The Words field");
+  Ui.Fill("Words", "Baked this morning");
+  Ui.Click("Save");
+  Ui.Click("Cakes");
+  Ui.Shot("the desk: a block filled in beside the page on a phone");
+  Ui.Click("Wide");
+  Ui.Shot("the desk: the same page, wide");
+  Ui.Click("Publish");
+  Assert.Visible("Published — customers see it while this version is live.");
+  Ui.SignOut();
+  Ui.Visit("/");
+  Assert.Visible("Baked this morning:");
+  Assert.Visible("Cakes");
+  Assert.Visible("Coffee roasted on Tuesdays");
+  Ui.Shot("the front page, with the new block, wide");
+  Ui.Viewport(390, 844);
+  Ui.Visit("/");
+  Assert.NoOverflow();
+  Ui.Shot("the front page, with the new block, phone");
+}
+
+[Test(Cafe)]
+void a_draft_is_invisible_to_customers() {
+  runas (Anna) {
+    var draft = EditRegion(MainVersion().Id, "front", "");
+    var hero = PlacedBlock.Where(b => b.Arrangement.Id == draft).OrderBy(b => b.Position).First();
+    SaveBlockValue(hero.Id, "en", new BlockValue { Name = "title", Text = "A secret we have not published" });
+  }
+  Ui.Visit("/");
+  Assert.Visible("Coffee roasted on Tuesdays");
+  Assert.Hidden("A secret we have not published");
+  // The staff member sees it — in the preview the desk starts, on their own browser.
+  Ui.SignInAs(Anna);
+  runas (Anna) { StartSitePreview(MainVersion().Id, null, true); }
+  Ui.Visit("/");
+  Assert.Visible("A secret we have not published");
+  Assert.Visible("Previewing Everyday as it is now, with drafts");
+  Ui.Shot("staff see the draft, with the preview banner");
+  Ui.SignOut();
+  Ui.Visit("/");
+  Assert.Hidden("A secret we have not published");
+  Assert.Hidden("Previewing");
+}
+
+[Test(Cafe)]
+void the_christmas_version_previewed_as_of_a_december_date() {
+  runas (Anna) {
+    var christmas = DuplicateVersion(MainVersion().Id, "Christmas");
+    SetThemeVariant(christmas, "christmas");
+    var draft = EditRegion(christmas, "front", "");
+    var hero = PlacedBlock.Where(b => b.Arrangement.Id == draft).OrderBy(b => b.Position).First();
+    SaveBlockValue(hero.Id, "en", new BlockValue { Name = "title", Text = "Gingerbread and glögg" });
+    var note = AddBlock(draft, "ShelfNote", 1);
+    SaveBlockValue(note, "en", new BlockValue { Name = "note", Text = "Open until noon on Christmas Eve" });
+    DateBlock(note, new DateTime(2026, 12, 20), new DateTime(2026, 12, 25));
+    PublishRegion(draft);
+    ScheduleVersion(christmas, new DateTime(2026, 12, 1), new DateTime(2026, 12, 27));
+  }
+  Ui.Viewport(1440, 900);
+  Ui.SignInAs(Anna);
+  Ui.Visit("/staff/pages");
+  Ui.Click("Christmas · Scheduled");
+  Assert.Visible("Live from 1 Dec 2026 until 27 Dec 2026.");
+  Ui.Fill("As of", "2026-12-24");
+  Ui.Click("Preview Christmas");
+  Ui.Shot("the desk: Christmas, previewed as of Christmas Eve");
+  Ui.Visit("/");
+  Assert.Visible("Previewing Christmas as of 24 Dec 2026, with drafts");
+  Assert.Visible("Gingerbread and glögg");
+  Assert.Visible("Open until noon on Christmas Eve");
+  Ui.Shot("the front page on Christmas Eve, previewed, wide");
+  Ui.Viewport(390, 844);
+  Ui.Visit("/");
+  Assert.NoOverflow();
+  Ui.Shot("the front page on Christmas Eve, previewed, phone");
+  Ui.Click("Back to the live site");
+  Assert.Visible("Coffee roasted on Tuesdays");
+  Assert.Hidden("Gingerbread and glögg");
+  // A customer, today, sees Everyday — Christmas is weeks away.
+  Ui.SignOut();
+  Ui.Visit("/");
+  Assert.Visible("Coffee roasted on Tuesdays");
+  Assert.Hidden("Gingerbread and glögg");
+}
+
+[Test(Cafe)]
+void a_scheduled_switch_puts_the_version_live_for_customers() {
+  runas (Anna) {
+    var christmas = DuplicateVersion(MainVersion().Id, "Christmas");
+    SetThemeVariant(christmas, "christmas");
+    var draft = EditRegion(christmas, "front", "");
+    var hero = PlacedBlock.Where(b => b.Arrangement.Id == draft).OrderBy(b => b.Position).First();
+    SaveBlockValue(hero.Id, "en", new BlockValue { Name = "title", Text = "Gingerbread and glögg" });
+    PublishRegion(draft);
+    // Its schedule has begun: it went live a day ago, and nobody pressed anything.
+    ScheduleVersion(christmas, DateTime.UtcNow.AddDays(-1), DateTime.UtcNow.AddDays(10));
+  }
+  Ui.Viewport(1440, 900);
+  Ui.Visit("/");
+  Assert.Visible("Gingerbread and glögg");
+  Assert.Hidden("Coffee roasted on Tuesdays");
+  Assert.Hidden("Previewing");
+  Ui.Shot("the front page in its Christmas version, live on its schedule");
+}
+
+[Test(Cafe)]
+void a_campaign_page_is_made_at_the_desk_and_an_unknown_one_is_not_there() {
+  Ui.Viewport(1440, 900);
+  Ui.SignInAs(Anna);
+  Ui.Visit("/staff/pages");
+  Ui.Click("New page", within: "Campaign");
+  Ui.Fill("Address of the new page", "Christmas gifts");
+  Ui.Click("Make the page");
+  Assert.Visible("Something new");
+  Ui.Click("Fill in Headline");
+  Ui.Click("Change", within: "The Headline field");
+  Ui.Fill("Headline", "Gifts under 200 kr");
+  Ui.Click("Save");
+  Ui.Click("Publish");
+  Ui.SignOut();
+  Ui.Visit("/c/christmas-gifts");
+  Assert.Visible("Gifts under 200 kr");
+  Ui.Shot("a campaign page");
+  Ui.Visit("/c/nothing-here");
+  Assert.Visible("This page is not here");
+}
+
+[Test(Cafe)]
+void a_colour_field_offers_the_themes_grounds_each_once_by_name() {
+  Ui.Viewport(390, 844);
+  Ui.SignInAs(Anna);
+  Ui.Visit("/staff/pages");
+  Ui.Click("Arrange", within: "Front");
+  Ui.Click("Fill in Headline");
+  // The block paints its background with `ground`, so the field offers the theme's GROUNDS — the café's foam and the
+  // crema a shelf note sits on — each by the theme's name for it, and not the espresso its words are set in.
+  Assert.Checked("Ground: Foam", true);
+  Assert.Checked("Ground: Crema", false);
+  Assert.Hidden("Espresso", within: "The Ground field");
+  Assert.Hidden("Bean", within: "The Ground field");
+  Assert.Hidden("Berry", within: "The Ground field");
+  Ui.Click("Ground: Crema");
+  Assert.Checked("Ground: Crema", true);
+  Assert.Checked("Ground: Foam", false);
+  Ui.Shot("the desk: a ground picked from the theme's grounds, by name, on a phone");
+  Ui.Viewport(1440, 900);
+  Ui.Shot("the desk: the ground field, wide");
+}
+
+[Test(Cafe)]
+void the_words_of_a_markdown_field_are_written_in_the_markdown_editor() {
+  Ui.Viewport(1440, 900);
+  Ui.SignInAs(Anna);
+  Ui.Visit("/staff/pages");
+  Ui.Click("Arrange", within: "Front");
+  Ui.Click("Fill in Headline");
+  Ui.Click("Change", within: "The Words under it field");
+  Assert.Visible("Written in Markdown", within: "The Words under it field");
+  // The editor itself started, over the words as they were.
+  Assert.Probe("MarkdownEditor", "dirty", false);
+  runas (Anna) {
+    var words = PagesWordsDraft.Single(d => d.Param == "body");
+    Assert.Equal("Come in for a cup.", $"{words.Body}".Trim());
+    // What staff type in the editor lands in its document — written here as the editor writes it.
+    words.Body = "Come in for a **cup**, stay for the *cake*.";
+    UnitOfWork.Commit();
+  }
+  Ui.Shot("the desk: a Markdown field in the Markdown editor");
+  Ui.Click("Use these words", within: "The Words under it field");
+  Assert.Hidden("Written in Markdown");
+  // Formatted: the emphasis is its own element on the desk, as it will be on the page.
+  Assert.Visible("cake", within: "The Words under it field");
+  runas (Anna) { Assert.Equal(0, PagesWordsDraft.Count()); }
+}
+
+[Test(Cafe)]
+void add_a_block_lists_each_block_drawn_small_with_its_name_and_what_it_is_for() {
+  Ui.Viewport(1440, 900);
+  Ui.SignInAs(Anna);
+  Ui.Visit("/staff/pages");
+  Ui.Click("Arrange", within: "Front");
+  Ui.Click("Add a block", within: "Blocks");
+  Assert.Visible("A headline over a photograph.", within: "Add a block");
+  Assert.Visible("What is on one shelf, in a sentence.", within: "Add a block");
+  Ui.Shot("the desk: add a block, each drawn small, wide");
+  Ui.Viewport(390, 844);
+  Assert.NoOverflow();
+  Ui.Shot("the desk: add a block, on a phone");
+  Ui.Click("Add Shelf note");
+  // The new block is open to be filled in, and the list is put away.
+  Assert.Visible("Save the dates");
+  Assert.Hidden("Cancel", within: "Blocks");
+}
+
+[Test(Cafe)]
+void a_live_query_filtered_on_a_parameters_property_answers() {
+  runas (Anna) {
+    var draft = EditRegion(MainVersion().Id, "front", "");
+    PublishRegion(draft);
+  }
+  Ui.SignInAs(Anna);
+  Ui.Visit("/staff/probe");
+  Assert.Visible("front: 1 arranged");
+}
+
+[Test(Cafe)]
+void the_sample_page_draws_one_block_alone_for_a_signed_in_reader() {
+  Ui.Viewport(720, 480);
+  Ui.SignInAs(Anna);
+  Ui.Visit(BlockSamplePath("ShelfNote"));
+  Assert.Visible("On the shelf today:");
+  Assert.Hidden("The Corner Café");
+  Ui.Shot("a block's sample page");
+}
+
+/// ⭐ A MAIL IS ARRANGED AT THE SAME DESK. Staff open the welcome mail's region, place a quote beside
+/// its words and see the MAIL itself — as the mail renderer writes it, on a phone, in a wide reading pane and as its
+/// plain text — before they publish; the next member welcomed gets it.
+[Test(Cafe)]
+void staff_arrange_a_mails_words_and_see_the_mail_itself() {
+  Ui.Viewport(1440, 900);
+  Ui.SignInAs(Anna);
+  Ui.Visit("/staff/pages");
+  Assert.Visible("What each mail says");
+  Assert.Visible("In the mail Welcome mail", within: "Welcome");
+  Ui.Click("Arrange", within: "Welcome");
+  Assert.Visible("Welcome to the Corner Café", within: "Preview of the mail");
+  Ui.Click("Plain text");
+  Assert.Visible("the first cup is on us");
+  Ui.Click("Add a block", within: "Blocks");
+  Ui.Shot("the mail desk: add a block, each drawn as mail");
+  Ui.Click("Add Quote");
+  Ui.Click("Change", within: "The What they said field");
+  Ui.Fill("What they said", "Best flat white in town, {member.email}.");
+  Ui.Click("Save");
+  Assert.Visible("Best flat white in town, olle@cafe.test.");
+  Ui.Shot("the mail desk: the mail's plain text with the quote");
+  Ui.Click("Phone");
+  Ui.Shot("the mail desk: the mail on a phone");
+  Ui.Click("Wide");
+  Ui.Shot("the mail desk: the mail in a wide reading pane");
+  // A word the mail does not fill is refused where it is written, by name.
+  Ui.Click("Change", within: "The What they said field");
+  Ui.Fill("What they said", "Hello {member.name}");
+  Ui.Click("Save");
+  Assert.Visible("{member.name} is not a placeholder this mail fills");
+  Ui.Click("Cancel", within: "The What they said field");
+  Ui.Click("Publish");
+  Assert.Visible("Published — customers see it while this version is live.");
+  // The next member welcomed — rendered as them, who previews nothing — gets the published mail.
+  runas (Olle) {
+    var mail = WelcomeMail(Member.Single(m => m.Email == "olle@cafe.test"));
+    Assert.Contains("Best flat white in town, olle@cafe.test.", mail.Text);
+    Assert.False(mail.IsPreview);
+  }
+}
+
+/// The mail's previews on a desk that is itself phone-width, where the preview sits below the fold: each one is
+/// photographed WITH the mail in it — the pixel tier's `Ui.Shot` paints a frame below the fold, so the preview reads as
+/// the mail rather than an empty box.
+[Test(Cafe)]
+void on_a_phone_the_mail_previews_are_photographed_with_the_mail_in_them() {
+  Ui.Viewport(390, 844);
+  Ui.SignInAs(Anna);
+  Ui.Visit("/staff/pages");
+  Ui.Click("Arrange", within: "Welcome");
+  Assert.Visible("Welcome to the Corner Café", within: "Preview of the mail");
+  Ui.Shot("the mail desk on a phone: the mail on a phone");
+  Ui.Click("Wide");
+  Ui.Shot("the mail desk on a phone: the mail in a wide reading pane");
+}

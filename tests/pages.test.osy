@@ -1,0 +1,167 @@
+// The desk's mechanism through its functions: the catalog the compiler writes, a region edited and published, a value
+// refused by name, versions on a schedule that cannot overlap, and a preview that is one staff member's alone.
+
+using Osysharp.Blocks;
+using Osysharp.PageBuilder;
+
+[TestFixture]
+void Cafe() {
+  var anna = new Member { Email = "anna@cafe.test", PasswordHash = Security.HashPassword("anna-pass-1") };
+  new RoleGrant { Member = anna, Role = AppRole.Staff };
+  var olle = new Member { Email = "olle@cafe.test", PasswordHash = Security.HashPassword("olle-pass-1") };
+  new RoleGrant { Member = olle, Role = AppRole.Member };
+  new Shelf { Name = "Beans" };
+  new Shelf { Name = "Cakes" };
+}
+
+principal Anna => Member.Single(m => m.Email == "anna@cafe.test");
+principal Olle => Member.Single(m => m.Email == "olle@cafe.test");
+
+[Test(Cafe)]
+void the_catalog_is_what_the_code_declares() {
+  runas (Anna) {
+    var headline = BlockTypes().Single(b => b.Name == "Headline");
+    Assert.Equal("Headline", headline.Label);
+    var title = headline.Params.Single(p => p.Name == "title");
+    Assert.Equal(BlockParamKind.Text, title.Kind);
+    Assert.Equal(80, title.MaxLength);
+    Assert.True(title.Required);
+    var body = headline.Params.Single(p => p.Name == "body");
+    Assert.Equal(BlockParamKind.Markdown, body.Kind);
+    Assert.Equal("Words under it", body.Label);
+    Assert.Equal("A sentence or two.", body.Hint);
+    Assert.Equal(BlockParamKind.Picture, headline.Params.Single(p => p.Name == "photo").Kind);
+    Assert.Equal(BlockParamKind.Color, headline.Params.Single(p => p.Name == "ground").Kind);
+    Assert.Equal(BlockParamKind.Choice, headline.Params.Single(p => p.Name == "weight").Kind);
+    Assert.Equal(BlockParamKind.Link, headline.Params.Single(p => p.Name == "link").Kind);
+    Assert.Equal(BlockParamKind.Row, BlockTypes().Single(b => b.Name == "ShelfNote").Params.Single(p => p.Name == "shelf").Kind);
+
+    var front = SiteRegions().Single(r => r.Name == "front");
+    Assert.Equal("/", front.Page);
+    Assert.False(front.Keyed);
+    Assert.Equal(2, front.Defaults.Count);
+    Assert.Equal("Coffee roasted on Tuesdays", front.Defaults[0].Values.Single(v => v.Name == "title").Text);
+    Assert.True(SiteRegions().Single(r => r.Name == "campaign").Keyed);
+
+    var site = SiteOffers();
+    Assert.True(site.Colors.Any(c => c.Value == "Berry"));
+    Assert.True(site.Pictures.Any(p => p.Value == "chemex_pour"));
+    Assert.True(site.Routes.Contains("/menu"));
+    Assert.Equal(["christmas"], site.ThemeVariants);
+    Assert.Equal(2, BlockChoices("Shelf").Count);
+  }
+}
+
+[Test(Cafe)]
+void a_region_is_edited_as_a_draft_and_published() {
+  runas (Anna) {
+    var draft = EditRegion(MainVersion().Id, "front", "");
+    var note = AddBlock(draft, "ShelfNote", 0);
+    Assert.Equal("", SaveBlockValue(note, "en", new BlockValue { Name = "note", Text = "Fresh today" }));
+    Assert.Equal("", SaveBlockValue(note, "en", new BlockValue { Name = "shelf", Ref = Shelf.Single(s => s.Name == "Cakes").Id }));
+    Assert.Equal("", PublishRegion(draft));
+  }
+  var front = ArrangedRegion("front", "");
+  Assert.True(front.Arranged);
+  Assert.Equal(3, front.Blocks.Count);
+  Assert.Equal("ShelfNote", front.Blocks[0].Block);
+  Assert.Equal("Fresh today", front.Blocks[0].Values.Single(v => v.Name == "note").Text);
+}
+
+[Test(Cafe)]
+void a_value_that_is_not_its_parameters_kind_is_refused_by_name() {
+  runas (Anna) {
+    var draft = EditRegion(MainVersion().Id, "front", "");
+    var hero = AddBlock(draft, "Headline", 0);
+    Assert.Equal("Headline needs filling in.", SaveBlockValue(hero, "en", new BlockValue { Name = "title", Text = " " }));
+    Assert.Equal("Ground: choose one of the theme's colours.", SaveBlockValue(hero, "en", new BlockValue { Name = "ground", Text = "#ff00ff" }));
+    Assert.Equal("Weight: choose one of Light, Bold.", SaveBlockValue(hero, "en", new BlockValue { Name = "weight", Text = "Heavy" }));
+    Assert.Equal("Photo: choose a picture the shop has, or upload one.",
+      SaveBlockValue(hero, "en", new BlockValue { Name = "photo", Text = "https://elsewhere.example/cat.jpg" }));
+    Assert.Equal("Link: the shop has no page at /nowhere.", SaveBlockValue(hero, "en", new BlockValue { Name = "link", Text = "/nowhere" }));
+    Assert.Equal("", SaveBlockValue(hero, "en", new BlockValue { Name = "link", Text = "/c/christmas-gifts" }));
+    Assert.Equal("Link: a page of the shop starts with /, an outside address with https://.",
+      SaveBlockValue(hero, "en", new BlockValue { Name = "link", Text = "javascript:alert(1)" }));
+    Assert.Equal("", SaveBlockValue(hero, "en", new BlockValue { Name = "title", Text = "Christmas at the corner" }));
+    Assert.Equal("", SaveBlockValue(hero, "en", new BlockValue { Name = "ground", Text = "Berry" }));
+  }
+}
+
+[Test(Cafe)]
+void schedules_may_not_overlap_and_the_scheduled_version_is_what_customers_see() {
+  runas (Anna) {
+    var main = MainVersion();
+    var christmas = DuplicateVersion(main.Id, "Christmas");
+    var draft = EditRegion(christmas, "front", "");
+    var hero = AddBlock(draft, "Headline", 0);
+    SaveBlockValue(hero, "en", new BlockValue { Name = "title", Text = "Merry from the corner" });
+    Assert.Equal("", PublishRegion(draft));
+    Assert.Equal("", ScheduleVersion(christmas, DateTime.UtcNow.AddDays(-1), DateTime.UtcNow.AddDays(20)));
+    var summer = DuplicateVersion(main.Id, "Summer");
+    Assert.Contains("overlaps Christmas", ScheduleVersion(summer, DateTime.UtcNow.AddDays(10), DateTime.UtcNow.AddDays(40)));
+    Assert.Equal("", ScheduleVersion(summer, DateTime.UtcNow.AddDays(20), DateTime.UtcNow.AddDays(40)));
+    Assert.Contains("the main version", ScheduleVersion(main.Id, DateTime.UtcNow, null));
+  }
+  Assert.Equal("Merry from the corner", ArrangedRegion("front", "").Blocks[0].Values.Single(v => v.Name == "title").Text);
+}
+
+[Test(Cafe)]
+void a_block_dated_for_later_is_not_shown_until_then() {
+  runas (Anna) {
+    var draft = EditRegion(MainVersion().Id, "front", "");
+    var note = AddBlock(draft, "ShelfNote", 0);
+    SaveBlockValue(note, "en", new BlockValue { Name = "note", Text = "From the first of December" });
+    Assert.Equal("", DateBlock(note, DateTime.UtcNow.AddDays(5), null));
+    Assert.Equal("", PublishRegion(draft));
+  }
+  Assert.False(ArrangedRegion("front", "").Blocks.Any(b => b.Values.Any(v => v.Text == "From the first of December")));
+  Assert.Equal(0, PlacedValue.Where(v => v.Text == "From the first of December").Count());
+}
+
+[Test(Cafe)]
+void a_preview_is_one_staff_members_and_moves_content_not_the_clock() {
+  runas (Anna) {
+    var main = MainVersion();
+    var christmas = DuplicateVersion(main.Id, "Christmas");
+    var draft = EditRegion(christmas, "front", "");
+    var hero = AddBlock(draft, "Headline", 0);
+    SaveBlockValue(hero, "en", new BlockValue { Name = "title", Text = "Christmas at the corner" });
+    Assert.Equal("", DateBlock(hero, DateTime.UtcNow.AddDays(30), null));
+    PublishRegion(draft);
+    StartSitePreview(christmas, DateTime.UtcNow.AddDays(31), false);
+    Assert.True(SitePreviewing());
+    Assert.Equal("Christmas at the corner", ArrangedRegion("front", "").Blocks[0].Values.Single(v => v.Name == "title").Text);
+    Assert.True(SiteDate() > DateTime.UtcNow.AddDays(29));
+    StartSitePreview(christmas, DateTime.UtcNow.AddDays(1), false);
+    Assert.False(ArrangedRegion("front", "").Blocks.Any(b => b.Values.Any(v => v.Text == "Christmas at the corner")));
+  }
+  // Nobody else previews: not an anonymous visitor, not another signed-in person.
+  Assert.False(SitePreviewing());
+  Assert.False(ArrangedRegion("front", "").Arranged);
+  runas (Olle) {
+    Assert.False(SitePreviewing());
+    Assert.False(ArrangedRegion("front", "").Arranged);
+  }
+}
+
+[Test(Cafe)]
+void a_customer_cannot_start_a_preview_or_edit_a_region() {
+  runas (Olle) {
+    Assert.Throws(() => StartSitePreview(Guid.NewGuid(), null, true));
+    Assert.Throws(() => EditRegion(Guid.NewGuid(), "front", ""));
+  }
+}
+
+[Test(Cafe)]
+void words_are_kept_per_language() {
+  runas (Anna) {
+    var draft = EditRegion(MainVersion().Id, "front", "");
+    var view = DraftOf(draft, "sv");
+    // The default arrangement's words arrived in Swedish too, as the locale file translates them.
+    Assert.Equal("Kaffe rostat på tisdagar", view.Blocks[0].Values.Single(v => v.Name == "title").Text);
+    var hero = view.Blocks[0].Id;
+    Assert.Equal("", SaveBlockValue(hero, "sv", new BlockValue { Name = "title", Text = "Kaffe varje tisdag" }));
+    Assert.Equal("Kaffe varje tisdag", DraftOf(draft, "sv").Blocks[0].Values.Single(v => v.Name == "title").Text);
+    Assert.Equal("Coffee roasted on Tuesdays", DraftOf(draft, "en").Blocks[0].Values.Single(v => v.Name == "title").Text);
+  }
+}

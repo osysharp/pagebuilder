@@ -1,0 +1,872 @@
+// The page desk — one component an app puts on a staff page:
+//
+//     [Route("/staff/pages")] [Authorize(IsStaff)] component StaffPages() { render { PagesDesk(); } }
+//
+// Three things, top to bottom: the site's VERSIONS (Everyday, Christmas…) — which is live, which is scheduled, the
+// theme variant and LOOK each wears (the whole design, from the looks the app installs; what a look
+// has no design for is listed before a version switches to it), and a preview of the whole site as one would look on a
+// date; the REGIONS the app declares,
+// each with what it shows now — its pages', and its MAILS' (the words a confirmation greets with,
+// and what staff place beside them); and, for the region being arranged, its blocks — added, moved, filled in and
+// published — beside the real page, at a phone's width or a wide screen's, or beside the mail itself as the mail
+// renderer writes it: at a phone's width, a wide reading pane's, and its plain-text twin.
+//
+// ⚑ WHO MAY USE IT IS THE APP'S TO SAY: it reads and writes `Osysharp.Blocks`' tables, which grant staff nothing until
+//   the app does (see that package). A caller without the grant sees an empty desk and can change nothing.
+
+namespace Osysharp.PageBuilder;
+
+using Osysharp.Blocks;
+using Osysharp.Storage;
+using Osysharp.MarkdownEditor;
+
+/// The page desk: the site's versions, its regions, and the region being arranged beside its live page.
+[Composable]
+public component PagesDesk() {
+  List<BlockSpec> types = [];
+  List<RegionSpec> regions = [];
+  SiteSpec site = new SiteSpec();
+  live var versions = SiteVersion.OrderBy(v => v.Name).ToList();
+  live var arrangements = RegionArrangement.Include(a => a.Version).ToList();
+  Guid? versionId = null;
+  // The region being arranged ("" when none), its key (a campaign page's slug), and the page it is on.
+  string arranging = "";
+  string arrangingKey = "";
+  string arrangingPage = "";
+  bool arrangingMail = false;
+  List<string> arrangingAllow = [];
+  string note = "";
+  bool noteIsProblem = false;
+  bool naming = false;
+  string newName = "";
+  DateOnly? liveFrom = null;
+  DateOnly? liveUntil = null;
+  DateOnly? previewOn = null;
+  bool withDrafts = true;
+  string newPage = "";
+  string newPageFor = "";
+  // A look a version is about to switch to, and what would not come along — shown before the switch, never after it.
+  string switchingTo = "";
+  List<string> leftBehind = [];
+
+  on mount {
+    types = BlockTypes();
+    regions = SiteRegions();
+    site = SiteOffers();
+    var main = MainVersion();
+    versionId = main.Id;
+  }
+
+  action Pick(SiteVersion v) {
+    versionId = v.Id;
+    liveFrom = v.LiveFrom == null ? null : DateOnly.FromDateTime(v.LiveFrom.Value);
+    liveUntil = v.LiveUntil == null ? null : DateOnly.FromDateTime(v.LiveUntil.Value);
+    arranging = "";
+    Tell("", false);
+  }
+  action Tell(string words, bool problem) { note = words; noteIsProblem = problem; }
+  action StartNaming() { naming = true; newName = ""; }
+  action StopNaming() { naming = false; }
+  action Duplicate() {
+    if (versionId == null) { return; }
+    try {
+      versionId = DuplicateVersion(versionId.Value, newName);
+      naming = false;
+      liveFrom = null;
+      liveUntil = null;
+      Tell($"{newName.Trim()} is a copy — nobody sees it until you switch it on or schedule it.", false);
+    } catch (ValidationException e) {
+      Tell(e.Message, true);
+    }
+  }
+  action MakeLive(SiteVersion v) {
+    MakeMainVersion(v.Id);
+    liveFrom = null;
+    liveUntil = null;
+    Tell($"{v.Name} is live now — customers see it whenever no scheduled version is.", false);
+  }
+  action SaveSchedule(SiteVersion v) {
+    var refusal = ScheduleVersion(v.Id, liveFrom == null ? null : liveFrom.Value.ToDateTime(TimeOnly.MinValue),
+      liveUntil == null ? null : liveUntil.Value.ToDateTime(TimeOnly.MinValue));
+    if (refusal != "") { Tell(refusal, true); return; }
+    Tell(liveFrom == null ? $"{v.Name} is not scheduled." : $"{v.Name} is scheduled.", false);
+  }
+  action Wear(SiteVersion v, string variant) {
+    var refusal = SetThemeVariant(v.Id, variant);
+    Tell(refusal == "" ? (variant == "" ? $"{v.Name} wears the theme itself." : $"{v.Name} wears the {variant} variant.") : refusal, refusal != "");
+  }
+  action Dress(SiteVersion v, string look) {
+    switchingTo = "";
+    leftBehind = [];
+    var behind = LookLeavesBehind(v.Id, look);
+    if (behind.Count > 0) {
+      // Nothing is dropped silently: say what the look has no design for, and switch only when staff say so.
+      switchingTo = look;
+      leftBehind = behind;
+      Tell("", false);
+      return;
+    }
+    Switch(v, look);
+  }
+  action Switch(SiteVersion v, string look) {
+    var refusal = SetLook(v.Id, look);
+    switchingTo = "";
+    leftBehind = [];
+    var name = LookName(site, look);
+    Tell(refusal == "" ? $"{v.Name} wears {name} — the same words and photographs, drawn in its design." : refusal, refusal != "");
+  }
+  action KeepLook() { switchingTo = ""; leftBehind = []; }
+  action Preview(SiteVersion v) {
+    StartSitePreview(v.Id, previewOn == null ? null : previewOn.Value.ToDateTime(TimeOnly.MinValue), withDrafts);
+    Tell($"You are previewing {v.Name} — open the site to walk through it. Nobody else sees any of it.", false);
+  }
+  action StopPreview() {
+    StopSitePreview();
+    Tell("Back to the live site.", false);
+  }
+  action Arrange(RegionSpec r, string key) {
+    switchingTo = "";
+    arranging = r.Name;
+    arrangingKey = key;
+    arrangingPage = r.Keyed ? PageOf(r.Page, key) : r.Page;
+    arrangingMail = r.Mail;
+    arrangingAllow = r.Allow;
+    Tell("", false);
+  }
+  action StartPage(RegionSpec r) { newPageFor = r.Name; newPage = ""; }
+  action MakePage(RegionSpec r) {
+    var slug = PageSlug(newPage);
+    if (slug == "") { Tell("Give the page an address — letters and digits, like christmas-gifts.", true); return; }
+    newPageFor = "";
+    Arrange(r, slug);
+  }
+  action CloseEditor() { arranging = ""; }
+
+  render {
+    var current = versions.FirstOrDefault(v => v.Id == versionId);
+    // The look the version wears — its own, else the app's — and the regions as THAT look declares them.
+    var look = current == null ? site.DefaultLook : ((current.Look ?? "") == "" ? site.DefaultLook : current.Look ?? "");
+    var shown = RegionsIn(regions, look);
+    Stack(gap: 6, w: "100%") {
+      PageHead("Pages", subtitle: "What each page shows, in which version of the site, and when.");
+      if (note != "") { Alert(note, tone: noteIsProblem ? Tone.Danger : Tone.Success); }
+
+      // ── the versions ─────────────────────────────────────────────────────────────────────────────────────────
+      Stack(gap: 3, label: "Versions") {
+        SectionLabel("Versions of the site");
+        Row(gap: 2, wrap: Wrapping.Wrap, align: Align.Center) {
+          foreach (var v in versions) {
+            Button(v.Name + " · " + VersionState(v), onPress: () => Pick(v), size: Size.Sm,
+                   tone: v.Id == versionId ? Tone.Primary : Tone.Default);
+          }
+          Button("New version", onPress: StartNaming, size: Size.Sm, tone: Tone.Ghost);
+        }
+        if (naming && current != null) {
+          Row(gap: 2, align: Align.End, wrap: Wrapping.Wrap) {
+            Box(minW: "16rem") { Field("Name of the new version", value: newName, placeholder: "Christmas", hint: $"A copy of {current.Name}, unpublished."); }
+            Button("Make the copy", onPress: Duplicate, tone: Tone.Primary);
+            Button("Cancel", onPress: StopNaming, tone: Tone.Ghost);
+          }
+        }
+        if (current != null) {
+          Card(current.Name, subtitle: VersionSentence(current)) {
+            Stack(gap: 4) {
+              if (!current.IsMain) {
+                Row(gap: 3, align: Align.End, wrap: Wrapping.Wrap, label: "Schedule") {
+                  DatePicker("Live from", value: liveFrom, clearable: true);
+                  DatePicker("Live until", value: liveUntil, clearable: true);
+                  Button("Save the schedule", onPress: () => SaveSchedule(current));
+                  Button("Make it live now", onPress: () => MakeLive(current), tone: Tone.Primary);
+                }
+                Text("It is live from the morning of its first date until the morning of its last.", fontSize: FontSize.Label,
+                     color: Colors.TextMuted);
+              }
+              if (site.Looks.Count > 0) {
+                Stack(gap: 2, label: "Look") {
+                  Row(gap: 2, align: Align.Center, wrap: Wrapping.Wrap) {
+                    Text("Look", color: Colors.TextMuted);
+                    foreach (var l in site.Looks) {
+                      Button(l.Label, onPress: () => Dress(current, l.Value), size: Size.Sm,
+                             tone: look == l.Value ? Tone.Primary : Tone.Default);
+                    }
+                  }
+                  foreach (var l in site.Looks.Where(x => x.Value == look && x.Hint != "")) {
+                    Text(l.Hint, fontSize: FontSize.Label, color: Colors.TextMuted);
+                  }
+                  if (switchingTo != "") {
+                    // Words from the warning ramp's own dark end: on its pale ground they read in every look, a dark one too.
+                    Stack(gap: 2, p: 3, bg: Colors.Warning.Subtle, color: Colors.Warning[900], borderW: 1, border: Colors.Warning,
+                          rounded: Radius.Md, role: UiRole.Status, label: "What will not come along") {
+                      Text($"{LookName(site, switchingTo)} has no design for {(leftBehind.Count == 1 ? "this" : "these")}. "
+                           + "They stay in the arrangement and are not shown while the version wears it:",
+                           fontWeight: FontWeight.Semibold);
+                      foreach (var line in leftBehind) { Text("· " + line); }
+                      Row(gap: 2) {
+                        Button($"Switch to {LookName(site, switchingTo)}", onPress: () => Switch(current, switchingTo), tone: Tone.Primary);
+                        Button($"Keep {LookName(site, look)}", onPress: KeepLook, tone: Tone.Ghost);
+                      }
+                    }
+                  }
+                }
+              }
+              if (site.ThemeVariants.Count > 0) {
+                Row(gap: 2, align: Align.Center, wrap: Wrapping.Wrap, label: "Theme") {
+                  Text("Wears", color: Colors.TextMuted);
+                  Button("The theme", onPress: () => Wear(current, ""), size: Size.Sm,
+                         tone: (current.ThemeVariant ?? "") == "" ? Tone.Primary : Tone.Default);
+                  foreach (var variant in site.ThemeVariants) {
+                    Button(Words(variant), onPress: () => Wear(current, variant), size: Size.Sm,
+                           tone: current.ThemeVariant == variant ? Tone.Primary : Tone.Default);
+                  }
+                }
+              }
+              Row(gap: 3, align: Align.End, wrap: Wrapping.Wrap, label: "Preview the whole site") {
+                DatePicker("As of", value: previewOn, clearable: true, placeholder: "Today");
+                Switch("With drafts", value: withDrafts);
+                Button($"Preview {current.Name}", onPress: () => Preview(current));
+                Link(href: "/", label: "Open the site") { Text("Open the site", color: Colors.Primary, fontWeight: FontWeight.Semibold); }
+                Button("Stop previewing", onPress: StopPreview, tone: Tone.Ghost);
+              }
+            }
+          }
+        }
+      }
+
+      // ── the site's frame: the menu, the strip across the top, the footer — on every page ──────────────────────────
+      if (current != null && arranging == "" && shown.Any(r => r.Frame)) {
+        Stack(gap: 0, label: "The site's frame") {
+          SectionLabel("Around every page");
+          foreach (var r in shown.Where(r => r.Frame).OrderBy(r => r.Menu ? 0 : 1).ToList()) {
+            var mine = arrangements.Where(a => a.Region == r.Name && a.Version.Id == current.Id).ToList();
+            Stack(gap: 2, py: 3, borderTW: 1, border: Colors.Border, label: Words(r.Name)) {
+              Row(justify: Justify.Between, align: Align.Center, gap: 3, wrap: Wrapping.Wrap) {
+                Stack(gap: 1) {
+                  Text(Words(r.Name), fontWeight: FontWeight.Semibold);
+                  Text(r.Menu ? "A list of links, on every page" : "On every page", fontSize: FontSize.Label, color: Colors.TextMuted);
+                }
+                Row(gap: 2, align: Align.Center) {
+                  Badge(RegionState(mine, "-"), tone: mine.Any(a => a.Key == "-" && a.Stage == ArrangementStage.Draft) ? Tone.Warning : Tone.Default);
+                  Button(r.Menu ? "Edit" : "Arrange", onPress: () => Arrange(r, ""), size: Size.Sm, tone: Tone.Primary);
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // ── the regions ──────────────────────────────────────────────────────────────────────────────────────────
+      if (current != null && arranging == "") {
+        Stack(gap: 0, label: "Regions") {
+          SectionLabel("What each page shows");
+          if (!shown.Any(r => !r.Mail && !r.Frame)) { EmptyState("No regions yet", body: "A page gets one with `Region(\"name\", allow: [...])` in its code."); }
+          foreach (var r in shown.Where(r => !r.Mail && !r.Frame).ToList()) {
+            var mine = arrangements.Where(a => a.Region == r.Name && a.Version.Id == current.Id).ToList();
+            Stack(gap: 2, py: 3, borderTW: 1, border: Colors.Border, label: Words(r.Name)) {
+              Row(justify: Justify.Between, align: Align.Center, gap: 3, wrap: Wrapping.Wrap) {
+                Stack(gap: 1) {
+                  Text(Words(r.Name), fontWeight: FontWeight.Semibold);
+                  Text(WhereItIs(r.Page, r.Keyed), fontSize: FontSize.Label, color: Colors.TextMuted);
+                }
+                if (!r.Keyed) {
+                  Row(gap: 2, align: Align.Center) {
+                    Badge(RegionState(mine, "-"), tone: mine.Any(a => a.Key == "-" && a.Stage == ArrangementStage.Draft) ? Tone.Warning : Tone.Default);
+                    Button("Arrange", onPress: () => Arrange(r, ""), size: Size.Sm, tone: Tone.Primary);
+                  }
+                } else {
+                  Button("New page", onPress: () => StartPage(r), size: Size.Sm);
+                }
+              }
+              if (r.Keyed) {
+                foreach (var key in mine.Select(a => a.Key).Distinct().OrderBy(k => k).ToList()) {
+                  Row(justify: Justify.Between, align: Align.Center, gap: 3, pl: 4, label: key) {
+                    Text(PageOf(r.Page, key), fontFamily: Font.Mono, fontSize: FontSize.Label);
+                    Row(gap: 2, align: Align.Center) {
+                      Badge(RegionState(mine, key), tone: mine.Any(a => a.Key == key && a.Stage == ArrangementStage.Draft) ? Tone.Warning : Tone.Default);
+                      Button("Arrange", onPress: () => Arrange(r, key), size: Size.Sm);
+                    }
+                  }
+                }
+                if (newPageFor == r.Name) {
+                  Row(gap: 2, align: Align.End, wrap: Wrapping.Wrap, pl: 4) {
+                    Box(minW: "16rem") { Field("Address of the new page", value: newPage, placeholder: "christmas-gifts"); }
+                    Button("Make the page", onPress: () => MakePage(r), tone: Tone.Primary);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      // ── the mails ─────────────────────────────────────────────────────────────────────────────────────────────
+      // A mail's region is arranged like a page's, in the same versions of the site: a Christmas version's confirmation
+      // goes out while the Christmas site is live.
+      if (current != null && arranging == "" && shown.Any(r => r.Mail)) {
+        Stack(gap: 0, label: "Mails") {
+          SectionLabel("What each mail says");
+          foreach (var r in shown.Where(r => r.Mail).ToList()) {
+            var mine = arrangements.Where(a => a.Region == r.Name && a.Version.Id == current.Id).ToList();
+            Stack(gap: 2, py: 3, borderTW: 1, border: Colors.Border, label: Words(r.Name)) {
+              Row(justify: Justify.Between, align: Align.Center, gap: 3, wrap: Wrapping.Wrap) {
+                Stack(gap: 1) {
+                  Text(Words(r.Name), fontWeight: FontWeight.Semibold);
+                  Text(InTheMail(r.Page), fontSize: FontSize.Label, color: Colors.TextMuted);
+                }
+                Row(gap: 2, align: Align.Center) {
+                  Badge(RegionState(mine, "-"), tone: mine.Any(a => a.Key == "-" && a.Stage == ArrangementStage.Draft) ? Tone.Warning : Tone.Default);
+                  Button("Arrange", onPress: () => Arrange(r, ""), size: Size.Sm, tone: Tone.Primary);
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // ── the region being arranged ────────────────────────────────────────────────────────────────────────────
+      if (current != null && arranging != "") {
+        if (shown.Any(r => r.Name == arranging && r.Menu)) {
+          PagesMenuEditor(current.Id, arranging, CloseEditor);
+        } else {
+          PagesRegionEditor(current.Id, arranging, arrangingKey, arrangingPage, types, arrangingAllow, site, CloseEditor, mail: arrangingMail,
+                            look: look);
+        }
+      }
+    }
+  }
+}
+
+/// The regions as `look` declares them: for each name, that look's region, else the app's own of that name. A region of
+/// one name in two looks is one arrangement — what it allows and its default are the look's.
+List<RegionSpec> RegionsIn(List<RegionSpec> all, string look) {
+  List<RegionSpec> found = [];
+  foreach (var name in all.Select(r => r.Name).Distinct().ToList()) {
+    var mine = all.FirstOrDefault(r => r.Name == name && r.Look == look) ?? all.FirstOrDefault(r => r.Name == name && r.Look == "");
+    if (mine != null) { found.Add(mine); }
+  }
+  return found;
+}
+
+/// What staff call a look — "Atelier" for `atelier`.
+string LookName(SiteSpec site, string look) {
+  return site.Looks.FirstOrDefault(l => l.Value == look)?.Label ?? look;
+}
+
+/// "Live" · "Scheduled" · "Not live" — a version's state at a glance.
+string VersionState(SiteVersion v) {
+  if (v.IsMain) { return "Live"; }
+  if (v.LiveFrom != null) { return ShowsAt(v.LiveFrom, v.LiveUntil, DateTime.UtcNow) ? "Live now" : "Scheduled"; }
+  return "Not live";
+}
+
+/// What a version is, in a sentence.
+string VersionSentence(SiteVersion v) {
+  if (v.IsMain) { return "Customers see this version whenever no scheduled version is live."; }
+  if (v.LiveFrom == null) { return "Not live — only staff previewing it see it."; }
+  var from = v.LiveFrom.Value.ToString("d MMM yyyy");
+  if (v.LiveUntil == null) { return $"Live from {from}."; }
+  var until = v.LiveUntil.Value.ToString("d MMM yyyy");
+  return $"Live from {from} until {until}.";
+}
+
+/// "Draft not published" · "Arranged" · "As the code has it".
+string RegionState(List<RegionArrangement> mine, string key) {
+  if (mine.Any(a => a.Key == key && a.Stage == ArrangementStage.Draft)) { return "Draft not published"; }
+  if (mine.Any(a => a.Key == key && a.Stage == ArrangementStage.Live)) { return "Arranged"; }
+  return "As the code has it";
+}
+
+/// A keyed region's page for one key: `/c/{slug}` with `christmas-gifts` → `/c/christmas-gifts`.
+string PageOf(string route, string key) {
+  var open = route.IndexOf("{");
+  if (open < 0) { return route; }
+  var close = route.IndexOf("}", open);
+  return close < 0 ? route : route.Substring(0, open) + key + route.Substring(close + 1);
+}
+
+/// "Christmas gifts!" → "christmas-gifts" — a page address staff can type as words.
+public string PageSlug(string words) {
+  return Regex.Replace(words.Trim().ToLower(), "[^a-z0-9]+", "-").Trim('-');
+}
+
+/// Which mail a mail's region is in: "In the mail Shop order confirmation". The mail's NAME is data handed in.
+string InTheMail(string mail) {
+  var named = Regex.Replace(mail, "([a-z])([A-Z])", "$1 $2");
+  var spoken = named.Length == 0 ? named : named.Substring(0, 1) + named.Substring(1).ToLower();
+  return $"In the mail {spoken}";
+}
+
+/// "product-page" → "Product page".
+string Words(string name) {
+  var spaced = name.Replace("-", " ").Replace("_", " ");
+  return spaced.Length == 0 ? spaced : spaced.Substring(0, 1).ToUpper() + spaced.Substring(1);
+}
+
+/// One region, arranged: its blocks — each can be moved, taken out and filled in — beside the live page, and the draft
+/// published when it is right. Opening it makes a draft (from what is live, or from the code's default) and starts a
+/// preview with drafts for this browser, so the page beside it shows the draft as it changes.
+[Composable]
+public component PagesRegionEditor(Guid versionId, string region, string key, string page, List<BlockSpec> types,
+    List<string> allow, SiteSpec site, Action onClose, bool mail = false, string look = "") {
+  Guid? draftId = null;
+  DraftView? draft = null;
+  Guid? selected = null;
+  string language = "";
+  string note = "";
+  bool noteIsProblem = false;
+  bool adding = false;
+  // A mail's region: the mail as the mail renderer writes it, rendered again after every change — for this browser,
+  // which previews the drafts, so it shows the draft; and the "Add a block" list's pictures of each block.
+  string mailHtml = "";
+  string mailText = "";
+  string mailSubject = "";
+  bool mailMissing = false;
+  List<BlockChoice> thumbnails = [];
+
+  on mount {
+    language = Session.Language;
+    draftId = EditRegion(versionId, region, key);
+    StartSitePreview(versionId, null, true);
+    Reload();
+  }
+
+  action Reload() {
+    if (draftId == null) { return; }
+    draft = DraftOf(draftId.Value, language);
+    if (mail) {
+      var rendered = MailSampleOf(region, language);
+      mailMissing = rendered == null;
+      mailHtml = rendered == null ? "" : rendered.Html;
+      mailText = rendered == null ? "" : rendered.Text;
+      mailSubject = rendered == null ? "" : rendered.Subject;
+    }
+  }
+  action InLanguage(string l) { language = l; Reload(); }
+  action Select(DraftBlockView b) { selected = selected == b.Id ? null : b.Id; adding = false; }
+  action StartAdding() {
+    adding = true;
+    selected = null;
+    if (mail && thumbnails.Count == 0) {
+      foreach (var t in types.Where(t => allow.Contains(t.Name))) {
+        var drawn = MailBlockSampleOf(t.Name);
+        thumbnails.Add(new BlockChoice { Value = t.Name, Label = drawn == null ? "" : drawn.Html });
+      }
+    }
+  }
+  action StopAdding() { adding = false; }
+  action Add(BlockSpec spec) {
+    selected = AddBlock(draftId!.Value, spec.Name, draft!.Blocks.Count);
+    adding = false;
+    note = "";
+    Reload();
+  }
+  action Move(DraftBlockView b, int by) { MoveBlock(b.Id, by); Reload(); }
+  action Remove(DraftBlockView b) {
+    RemoveBlock(b.Id);
+    if (selected == b.Id) { selected = null; }
+    Reload();
+  }
+  action Publish() {
+    var refusal = PublishRegion(draftId!.Value);
+    if (refusal != "") { note = refusal; noteIsProblem = true; Reload(); return; }
+    note = "Published — customers see it while this version is live.";
+    noteIsProblem = false;
+    draftId = EditRegion(versionId, region, key);
+    Reload();
+  }
+  action Discard() {
+    DiscardDraft(draftId!.Value);
+    onClose();
+  }
+  action BackToCode() {
+    ResetRegion(versionId, region, key);
+    onClose();
+  }
+
+  render {
+    var title = Words(region);
+    Stack(gap: 4, label: $"Arranging {title}") {
+      Row(justify: Justify.Between, align: Align.Center, gap: 3, wrap: Wrapping.Wrap) {
+        Stack(gap: 1) {
+          Text(draft == null ? title : $"{title} — {draft.Version}", fontSize: FontSize.Heading, fontWeight: FontWeight.Semibold);
+          Text("A draft: nobody sees it until you publish it.", color: Colors.TextMuted, fontSize: FontSize.Label);
+        }
+        Row(gap: 2, align: Align.Center, wrap: Wrapping.Wrap) {
+          if (App.Languages.Count > 1) {
+            Text("Words in", color: Colors.TextMuted, fontSize: FontSize.Label);
+            foreach (var l in App.Languages) {
+              Button(l.ToUpper(), onPress: () => InLanguage(l), size: Size.Sm, tone: l == language ? Tone.Primary : Tone.Ghost);
+            }
+          }
+          Button("Close", onPress: onClose, size: Size.Sm, tone: Tone.Ghost);
+        }
+      }
+      if (note != "") { Alert(note, tone: noteIsProblem ? Tone.Danger : Tone.Success); }
+      if (draft != null) {
+        Box(display: Display.Grid, cols: "repeat(auto-fit, minmax(22rem, 1fr))", gap: 6, align: Align.Start) {
+          // The blocks, in order, and the one being filled in.
+          Stack(gap: 3, label: "Blocks") {
+            if (draft.Blocks.Count == 0) { EmptyState("No blocks", body: "Add one — this region shows nothing until you do."); }
+            foreach (var b in draft.Blocks) {
+              Stack(gap: 0, borderW: 1, border: b.Id == selected ? Colors.Primary : Colors.Border, rounded: Radius.Md, bg: Colors.Surface,
+                    label: $"Block {b.Position + 1}: {b.Label}") {
+                Row(justify: Justify.Between, align: Align.Center, gap: 2, px: 3, py: 2) {
+                  Pressable(onClick: () => Select(b), label: $"Fill in {b.Label}") {
+                    Stack(gap: 0) {
+                      Text(b.Label, fontWeight: FontWeight.Semibold);
+                      Text(Said(b.Summary), fontSize: FontSize.Label, color: Colors.TextMuted);
+                    }
+                  }
+                  Row(gap: 1, align: Align.Center) {
+                    if (b.Changed) { Badge("Changed in code", tone: Tone.Warning); }
+                    if (b.Gone) { Badge("No longer in the app", tone: Tone.Danger); }
+                    if (b.ShowFrom != null || b.ShowUntil != null) { Badge("Dated", tone: Tone.Default); }
+                    if (b.Kept) { Badge("Stays", tone: Tone.Default); }
+                    Button("Up", onPress: () => Move(b, -1), size: Size.Sm, tone: Tone.Ghost);
+                    Button("Down", onPress: () => Move(b, 1), size: Size.Sm, tone: Tone.Ghost);
+                    if (!b.Kept) { Button("Take out", onPress: () => Remove(b), size: Size.Sm, tone: Tone.Ghost); }
+                  }
+                }
+                if (b.Id == selected) {
+                  foreach (var spec in types.Where(t => t.Name == b.Block)) {
+                    Box(borderTW: 1, border: Colors.Border, px: 3, py: 3) {
+                      PagesInspector(b, spec, site, language, Reload);
+                    }
+                  }
+                }
+              }
+            }
+            if (adding) {
+              Stack(gap: 2, label: "Add a block") {
+                Row(justify: Justify.Between, align: Align.Center) {
+                  Text("Add a block", fontWeight: FontWeight.Semibold);
+                  Button("Cancel", onPress: StopAdding, size: Size.Sm, tone: Tone.Ghost);
+                }
+                foreach (var t in types.Where(t => allow.Contains(t.Name) && (look == "" || t.EveryLook || t.Looks.Contains(look)))) {
+                  // Each block drawn small, as it looks in this site with its sample words — then its name and what it
+                  // is for.
+                  Box(position: Position.Relative, display: Display.Grid, cols: "7.5rem minmax(0, 1fr)", gap: 3, align: Align.Center,
+                      p: 2, bg: Colors.Surface, color: Colors.OnSurface, borderW: 1, border: Colors.Border, rounded: Radius.Md,
+                      label: t.Label) {
+                    // `inert`: a picture of the block — its own links and buttons are not a way off the desk.
+                    Box(w: "7.5rem", h: "5rem", overflow: Overflow.Hidden, position: Position.Relative, bg: Colors.Bg, borderW: 1,
+                        border: Colors.Border, rounded: Radius.Sm, inert: true) {
+                      if (mail) {
+                        // A mail block drawn as a mail — by the mail renderer, in a phone's narrow column, at two fifths.
+                        foreach (var drawn in thumbnails.Where(d => d.Value == t.Name && d.Label != "")) {
+                          Frame(drawn.Label, title: $"{t.Label}, drawn small", w: "300px", h: "200px", scale: 0.4,
+                                transformOrigin: "top left", borderW: 0, position: Position.Absolute, top: "0", left: "0");
+                        }
+                      } else {
+                        // Drawn at a wide screen's width and a sixth of its size — what the block looks like on the page.
+                        PageFrame(BlockSamplePathIn(t.Name, look), title: $"{t.Label}, drawn small", w: "720px", h: "480px", scale: 0.1667,
+                                  transformOrigin: "top left", borderW: 0, position: Position.Absolute, top: "0", left: "0");
+                      }
+                    }
+                    Stack(gap: 0) {
+                      Text(t.Label, fontWeight: FontWeight.Semibold);
+                      if (t.Hint != "") { Text(t.Hint, fontSize: FontSize.Label, color: Colors.TextMuted); }
+                    }
+                    // The whole card is the button — laid over it, last, so nothing inside the picture takes the press.
+                    Pressable(onClick: () => Add(t), label: $"Add {t.Label}", position: Position.Absolute, inset: "0", w: "100%",
+                              bg: Colors.Transparent, borderW: 0, rounded: Radius.Md, cursor: Cursor.Pointer);
+                  }
+                }
+              }
+            } else {
+              Row { Button("Add a block", onPress: StartAdding); }
+            }
+            if (draft.Problems.Count > 0) {
+              Stack(gap: 1, label: "Before it can go live") {
+                foreach (var p in draft.Problems) { Text(p, fontSize: FontSize.Label, color: Colors.Danger); }
+              }
+            }
+            Row(gap: 2, wrap: Wrapping.Wrap) {
+              Button("Publish", onPress: Publish, tone: Tone.Primary);
+              Button("Throw the draft away", onPress: Discard);
+              Button("Back to the code's own", onPress: BackToCode, tone: Tone.Ghost);
+            }
+          }
+          if (mail) {
+            PagesMailPreview(mailHtml, mailText, mailSubject, mailMissing);
+          } else {
+            PagesPreview(page);
+          }
+        }
+      }
+    }
+  }
+}
+
+/// A block's words in a line — its first text value, or how many values it has.
+/// Where a region is: "On /" — or "One page per address — /c/{slug}". The address is DATA handed in, not words to translate.
+string WhereItIs(string page, bool keyed) {
+  return keyed ? $"One page per address — {page}" : $"On {page}";
+}
+
+
+/// The page the region is on, live, in a frame of its own — at a phone's width or a wide screen's.
+[Composable]
+public component PagesPreview(string page) {
+  bool wide = false;
+  string address = "";
+  on mount { address = page.Contains("{") ? "" : page; }
+  render {
+    Stack(gap: 2, label: "Preview") {
+      Row(justify: Justify.Between, align: Align.Center, gap: 2, wrap: Wrapping.Wrap) {
+        Row(gap: 1) {
+          Button("Phone", onPress: () => { wide = false; }, size: Size.Sm, tone: wide ? Tone.Ghost : Tone.Primary);
+          Button("Wide", onPress: () => { wide = true; }, size: Size.Sm, tone: wide ? Tone.Primary : Tone.Ghost);
+        }
+        Box(minW: "12rem") { Field("Page", value: address, hint: page.Contains("{") ? "Type the address of one of these pages." : ""); }
+      }
+      if (address != "") {
+        if (wide) {
+          // A wide screen, drawn at half size so the whole width fits beside the blocks.
+          Box(w: "640px", maxW: "100%", h: "400px", overflow: Overflow.Hidden, borderW: 1, border: Colors.Border, rounded: Radius.Md) {
+            PageFrame(address, title: "The page, on a wide screen", w: "1280px", h: "800px", scale: 0.5, transformOrigin: "top left",
+                      borderW: 0);
+          }
+        } else {
+          Box(w: "390px", maxW: "100%", h: "760px", overflow: Overflow.Hidden, borderW: 1, border: Colors.Border, rounded: Radius.Lg) {
+            PageFrame(address, title: "The page, on a phone", w: "390px", h: "760px", borderW: 0);
+          }
+        }
+      }
+    }
+  }
+}
+
+/// A mail's region, previewed as the MAIL: the HTML the mail renderer writes, in a frame of its own, at a phone's width or
+/// in a wide reading pane — and its plain-text twin, the words a client that shows no HTML reads. Rendered for something
+/// real (the region's `sample:` — the latest order) with this browser's drafts.
+[Composable]
+public component PagesMailPreview(string html, string text, string subject, bool missing) {
+  string showing = "phone";
+  render {
+    Stack(gap: 2, label: "Preview of the mail") {
+      Row(gap: 1, role: UiRole.Group, label: "Show the mail") {
+        Button("Phone", onPress: () => { showing = "phone"; }, size: Size.Sm, tone: showing == "phone" ? Tone.Primary : Tone.Ghost);
+        Button("Wide", onPress: () => { showing = "wide"; }, size: Size.Sm, tone: showing == "wide" ? Tone.Primary : Tone.Ghost);
+        Button("Plain text", onPress: () => { showing = "text"; }, size: Size.Sm, tone: showing == "text" ? Tone.Primary : Tone.Ghost);
+      }
+      if (missing) {
+        EmptyState("Nothing to show it with yet", body: "The mail is previewed for something real — once there is one (an order), it shows here.");
+      } else if (html != "") {
+        Text(subject, fontSize: FontSize.Label, color: Colors.TextMuted);
+        if (showing == "phone") {
+          Box(w: "390px", maxW: "100%", h: "760px", overflow: Overflow.Hidden, borderW: 1, border: Colors.Border, rounded: Radius.Lg) {
+            Frame(html, title: "The mail, on a phone", w: "390px", h: "760px", borderW: 0);
+          }
+        } else if (showing == "wide") {
+          // A reading pane 720 pixels wide, drawn at three quarters so it fits beside the blocks.
+          Box(w: "540px", maxW: "100%", h: "675px", overflow: Overflow.Hidden, borderW: 1, border: Colors.Border, rounded: Radius.Md) {
+            Frame(html, title: "The mail, in a wide reading pane", w: "720px", h: "900px", scale: 0.75, transformOrigin: "top left",
+                  borderW: 0);
+          }
+        } else {
+          Box(maxW: "34rem", p: 4, bg: Colors.Surface, color: Colors.OnSurface, borderW: 1, border: Colors.Border, rounded: Radius.Md,
+              label: "The mail's plain text") {
+            Text(text, fontFamily: Font.Mono, fontSize: FontSize.Label, whiteSpace: WhiteSpace.PreWrap);
+          }
+        }
+      }
+    }
+  }
+}
+
+/// One placed block's fields — each as its parameter's type has it: words, a number, on or off, one of a list, one of
+/// the theme's colours, a picture, a page, a row — and the dates it shows between.
+[Composable]
+public component PagesInspector(DraftBlockView block, BlockSpec spec, SiteSpec site, string language, Action changed) {
+  string editing = "";
+  string text = "";
+  Guid? words = null;
+  string problem = "";
+  List<BlockChoice> rows = [];
+  DateOnly? from = null;
+  DateOnly? until = null;
+
+  on mount {
+    from = block.ShowFrom == null ? null : DateOnly.FromDateTime(block.ShowFrom.Value);
+    until = block.ShowUntil == null ? null : DateOnly.FromDateTime(block.ShowUntil.Value);
+    foreach (var p in spec.Params.Where(p => p.Kind == BlockParamKind.Row)) { rows.AddRange(BlockChoices(p.Entity)); }
+  }
+
+  action Edit(BlockParam p) {
+    editing = p.Name;
+    problem = "";
+    text = ValueOf(block, p.Name) ?? "";
+    // Formatted words get the editor the mail desk uses, over a scratch row of this person's.
+    words = p.Kind == BlockParamKind.Markdown ? OpenPagesWords(block.Id, p.Name, language, text) : null;
+  }
+  action Cancel() {
+    if (words != null) { DropPagesWords(words.Value); }
+    words = null;
+    editing = "";
+    problem = "";
+  }
+  action SaveWords() {
+    var refusal = SavePagesWords(words!.Value);
+    if (refusal != "") { problem = refusal; return; }
+    words = null;
+    editing = "";
+    problem = "";
+    changed();
+  }
+  action Put(BlockValue v) {
+    var refusal = SaveBlockValue(block.Id, language, v);
+    if (refusal != "") { problem = refusal; return; }
+    editing = "";
+    problem = "";
+    changed();
+  }
+  action SaveText(BlockParam p) { Put(new BlockValue { Name = p.Name, Text = text }); }
+  action Choose(BlockParam p, string value) { Put(new BlockValue { Name = p.Name, Text = value }); }
+  action ChooseRow(BlockParam p, BlockChoice c) { Put(new BlockValue { Name = p.Name, Ref = Guid.Parse(c.Value) }); }
+  action SaveDates() {
+    var refusal = DateBlock(block.Id, from == null ? null : from.Value.ToDateTime(TimeOnly.MinValue),
+      until == null ? null : until.Value.ToDateTime(TimeOnly.MinValue));
+    if (refusal != "") { problem = refusal; return; }
+    problem = "";
+    changed();
+  }
+
+  render {
+    Stack(gap: 4, label: $"{spec.Label}: its fields") {
+      if (spec.Hint != "") { Text(spec.Hint, color: Colors.TextMuted, fontSize: FontSize.Label); }
+      if (problem != "") { Alert(problem, tone: Tone.Danger); }
+      foreach (var p in spec.Params) {
+        var value = ValueOf(block, p.Name);
+        Stack(gap: 2, label: $"The {p.Label} field") {
+          Row(justify: Justify.Between, align: Align.Center, gap: 2) {
+            Text(p.Required ? p.Label : p.Label + " (optional)", fontWeight: FontWeight.Semibold, fontSize: FontSize.Label);
+            if (editing != p.Name && (p.Kind == BlockParamKind.Text || p.Kind == BlockParamKind.Markdown || p.Kind == BlockParamKind.Number
+                || p.Kind == BlockParamKind.Decimal || p.Kind == BlockParamKind.Link)) {
+              Button("Change", onPress: () => Edit(p), size: Size.Sm, tone: Tone.Ghost);
+            }
+          }
+          if (p.Hint != "") { Text(p.Hint, fontSize: FontSize.Label, color: Colors.TextMuted); }
+          if (editing == p.Name) {
+            if (p.Kind == BlockParamKind.Markdown && words != null) {
+              Text(p.MaxLength > 0 ? $"Written in Markdown — at most {p.MaxLength} characters." : "Written in Markdown.",
+                   fontSize: FontSize.Label, color: Colors.TextMuted);
+              // A few lines tall — a block's words are a paragraph, not a document; it scrolls past that.
+              Box(borderW: 1, border: Colors.Border, rounded: Radius.Md, bg: Colors.Surface, h: "16rem", overflowY: Overflow.Auto,
+                  label: $"{p.Label} — the editor") {
+                MarkdownEditor(ownerType: "PagesWordsDraft", ownerId: words.Value, property: "Body", density: compact);
+              }
+              Row(gap: 2) {
+                // Not "Save": the editor has a Save of its own, which keeps the draft — this one puts the words on the block.
+                Button("Use these words", onPress: SaveWords, size: Size.Sm, tone: Tone.Primary);
+                Button("Cancel", onPress: Cancel, size: Size.Sm, tone: Tone.Ghost);
+              }
+            } else {
+              Field(p.Label, value: text, hint: p.MaxLength > 0 ? $"At most {p.MaxLength} characters." : p.Kind == BlockParamKind.Link ? "A page of the shop, like /coffee, or https://…" : "");
+              Row(gap: 2) {
+                Button("Save", onPress: () => SaveText(p), size: Size.Sm, tone: Tone.Primary);
+                Button("Cancel", onPress: Cancel, size: Size.Sm, tone: Tone.Ghost);
+              }
+            }
+          } else if (p.Kind == BlockParamKind.Switch) {
+            Row(gap: 1, role: UiRole.Group, label: p.Label) {
+              Button("On", onPress: () => Choose(p, "true"), size: Size.Sm, tone: value == "true" ? Tone.Primary : Tone.Default);
+              Button("Off", onPress: () => Choose(p, "false"), size: Size.Sm, tone: value == "false" ? Tone.Primary : Tone.Default);
+            }
+          } else if (p.Kind == BlockParamKind.Choice) {
+            Row(gap: 1, wrap: Wrapping.Wrap, role: UiRole.Group, label: p.Label) {
+              foreach (var c in p.Choices) {
+                Button(c.Label, onPress: () => Choose(p, c.Value), size: Size.Sm, tone: value == c.Value ? Tone.Primary : Tone.Default);
+              }
+            }
+          } else if (p.Kind == BlockParamKind.Color) {
+            // Each of the theme's colours ONCE, by the theme's own name for it — only the grounds for a field the block
+            // paints a background with, only the inks for one it sets words in.
+            Box(display: Display.Grid, cols: "repeat(auto-fill, minmax(8.5rem, 1fr))", gap: 2, role: UiRole.RadioGroup, label: p.Label) {
+              foreach (var c in ColorsFor(site, p)) {
+                var on = value == c.Value || (value != null && c.Aliases.Contains(value));
+                Pressable(onClick: () => Choose(p, c.Value), role: UiRole.Radio, checked: on, label: $"{p.Label}: {c.Label}",
+                          display: Display.Flex, align: Align.Center, gap: 2, px: 2, py: 2, minH: Length.TouchDense, textAlign: TextAlign.Left,
+                          bg: Colors.Surface, color: Colors.OnSurface, borderW: on ? 2 : 1, border: on ? Colors.Primary : Colors.Border,
+                          rounded: Radius.Md) {
+                  Box(w: "22px", h: "22px", shrink: 0, rounded: Radius.Circle, bg: "var(--colors-" + c.Value.ToLower() + ")",
+                      borderW: 1, border: Colors.Border);
+                  Text(c.Label, fontSize: FontSize.Label, fontWeight: on ? FontWeight.Semibold : FontWeight.Regular);
+                }
+              }
+            }
+          } else if (p.Kind == BlockParamKind.Picture) {
+            Row(gap: 2, wrap: Wrapping.Wrap, role: UiRole.Group, label: p.Label) {
+              foreach (var pic in site.Pictures) {
+                Pressable(onClick: () => Choose(p, pic.Value), label: $"{p.Label}: {pic.Label}") {
+                  Image(picture: pic.Value, alt: pic.Label, w: "72px", h: "54px", objectFit: ObjectFit.Cover, rounded: Radius.Sm,
+                        borderW: value == pic.Value ? 3 : 0, border: Colors.Primary);
+                }
+              }
+              if (value != null && value != "" && !site.Pictures.Any(x => x.Value == value)) {
+                Image(picture: value, alt: "The uploaded picture", w: "72px", h: "54px", objectFit: ObjectFit.Cover, rounded: Radius.Sm,
+                      borderW: 3, border: Colors.Primary);
+              }
+              PagesPictureUpload(block.Id, p.Name, changed);
+            }
+          } else if (p.Kind == BlockParamKind.Row) {
+            Row(gap: 1, wrap: Wrapping.Wrap, role: UiRole.Group, label: p.Label) {
+              foreach (var c in rows) {
+                Button(c.Label, onPress: () => ChooseRow(p, c), size: Size.Sm, tone: RefOf(block, p.Name) == c.Value ? Tone.Primary : Tone.Default);
+              }
+            }
+          } else if (p.Kind == BlockParamKind.Markdown) {
+            Box(px: 3, py: 2, bg: Colors.Muted, rounded: Radius.Sm) { Markdown(Said(value)); }
+          } else {
+            Text(value == null || value == "" ? "—" : Said(value), color: value == null || value == "" ? Colors.TextMuted : Colors.OnSurface);
+          }
+        }
+      }
+      Stack(gap: 2, borderTW: 1, border: Colors.Border, pt: 3, label: "Dates") {
+        Text("When it shows", fontWeight: FontWeight.Semibold, fontSize: FontSize.Label);
+        Row(gap: 3, align: Align.End, wrap: Wrapping.Wrap) {
+          DatePicker("Shows from", value: from, clearable: true, placeholder: "From the start");
+          DatePicker("Shows until", value: until, clearable: true, placeholder: "For as long as the page");
+          Button("Save the dates", onPress: SaveDates, size: Size.Sm);
+        }
+        Text("It is gone from the morning of its last date.", fontSize: FontSize.Label, color: Colors.TextMuted);
+      }
+    }
+  }
+}
+
+/// "Upload a photograph…" for one Picture field of a placed block: the file goes to the public store and becomes the
+/// block's picture.
+[Composable]
+public component PagesPictureUpload(Guid placedId, string param, Action changed) {
+  string problem = "";
+  action Uploaded(UploadedFile f) {
+    problem = PagesUploadPicture(placedId, param, f.Path);
+    if (problem == "") { changed(); }
+  }
+  render {
+    Stack(gap: 1) {
+      Upload(accept: "image/jpeg,image/png,image/webp", onUploaded: Uploaded) {
+        Text("Upload a photograph…", px: 3, py: 2, borderW: 1, border: Colors.Border, rounded: Radius.Md, color: Colors.Primary,
+             fontSize: FontSize.Label);
+      }
+      if (problem != "") { Text(problem, color: Colors.Danger, fontSize: FontSize.Label); }
+    }
+  }
+}
+
+/// What staff wrote, shown as they wrote it. Their words are DATA — already kept per language by the platform — so they
+/// are handed to the page through here rather than read straight off a value, which would make every value of that
+/// shape a text of the app's own to translate (a colour's name, a page's address).
+string Said(string? words) {
+  return words ?? "";
+}
+
+/// A placed block's value of `name`, as text, or null.
+string? ValueOf(DraftBlockView b, string name) {
+  return b.Values.FirstOrDefault(v => v.Name == name)?.Text;
+}
+
+/// A placed block's picked row for `name`, as text, or "".
+string RefOf(DraftBlockView b, string name) {
+  var r = b.Values.FirstOrDefault(v => v.Name == name)?.Ref;
+  return r == null ? "" : r.Value.ToString();
+}

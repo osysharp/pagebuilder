@@ -1,0 +1,570 @@
+// sv (Svenska): the words of Osysharp.PageBuilder, translated.
+// Written and kept in step with the source by `osy translate`: a new text arrives as `=> null`, a text
+// whose source changed keeps its old translation in a `was` clause. The words are yours to edit.
+// Source language: en.
+
+translations sv {
+  // ── InTheMail ──
+  /// InTheMail · text on the page
+  /// placeholders: {spoken} = spoken (string)
+  /// shown through InTheMail()
+  text "In the mail {spoken}" => "I mejlet {spoken}";
+
+  // ── PagesDesk ──
+  /// PagesDesk · a control's name for screen readers
+  accessibleName "Look" => "Utseende";
+  /// PagesDesk · a control's name for screen readers
+  accessibleName "Mails" => "Mejl";
+  /// PagesDesk · a control's name for screen readers
+  /// beside: "As of", "With drafts", "Stop previewing"
+  accessibleName "Open the site" => "Öppna sajten";
+  /// PagesDesk · a control's name for screen readers
+  accessibleName "Preview the whole site" => "Förhandsvisa hela sajten";
+  /// PagesDesk · a control's name for screen readers
+  accessibleName "Regions" => "Ytor";
+  /// PagesDesk · a control's name for screen readers
+  /// beside: "It is live from the morning of its first date until the morning of its last."
+  accessibleName "Schedule" => "Schema";
+  /// PagesDesk · a control's name for screen readers
+  accessibleName "The site's frame" => "Sajtens ram";
+  /// PagesDesk · a control's name for screen readers
+  accessibleName "Theme" => "Tema";
+  /// PagesDesk · a control's name for screen readers
+  /// beside: "Pages"
+  accessibleName "Versions" => "Versioner";
+  /// PagesDesk · a control's name for screen readers
+  accessibleName "What will not come along" => "Det här följer inte med";
+  /// PagesDesk · a button's label · at most ~13 characters
+  /// shown through Button.label
+  button "Arrange" => "Ordna";
+  /// PagesDesk · a button's label · at most ~12 characters
+  /// shown through Button.label
+  /// beside: "16rem", "Make the copy"
+  /// also in PagesRegionEditor
+  /// also in PagesInspector
+  /// also in PagesMenuEditor
+  button "Cancel" => "Avbryt";
+  /// PagesDesk · a button's label · at most ~10 characters
+  /// shown through Button.label
+  button "Edit" => "Ändra";
+  /// PagesDesk · a button's label · at most ~21 characters
+  /// placeholders: {LookName} = LookName(…) (string)
+  /// shown through Button.label
+  button "Keep {LookName}" => "Behåll {LookName}";
+  /// PagesDesk · a button's label · at most ~23 characters
+  /// shown through Button.label
+  /// beside: "Live from", "Live until", "Save the schedule"
+  button "Make it live now" => "Gör den live nu";
+  /// PagesDesk · a button's label · at most ~19 characters
+  /// shown through Button.label
+  /// beside: "16rem", "Cancel"
+  button "Make the copy" => "Gör kopian";
+  /// PagesDesk · a button's label · at most ~19 characters
+  /// shown through Button.label
+  /// beside: "16rem"
+  button "Make the page" => "Skapa sidan";
+  /// PagesDesk · a button's label · at most ~14 characters
+  /// shown through Button.label
+  button "New page" => "Ny sida";
+  /// PagesDesk · a button's label · at most ~17 characters
+  /// shown through Button.label
+  button "New version" => "Ny version";
+  /// PagesDesk · a button's label · at most ~31 characters
+  /// placeholders: {current.Name} = current.Name (string)
+  /// shown through Button.label
+  /// beside: "As of", "With drafts", "Open the site", "Stop previewing"
+  button "Preview {current.Name}" => "Förhandsvisa {current.Name}";
+  /// PagesDesk · a button's label · at most ~24 characters
+  /// shown through Button.label
+  /// beside: "Live from", "Live until", "Make it live now"
+  button "Save the schedule" => "Spara schemat";
+  /// PagesDesk · a button's label · at most ~21 characters
+  /// shown through Button.label
+  /// beside: "As of", "With drafts", "Open the site"
+  button "Stop previewing" => "Sluta förhandsvisa";
+  /// PagesDesk · a button's label · at most ~28 characters
+  /// placeholders: {LookName} = LookName(…) (string)
+  /// shown through Button.label
+  button "Switch to {LookName}" => "Byt till {LookName}";
+  /// PagesDesk · a button's label · at most ~15 characters
+  /// shown through Button.label
+  /// beside: "Wears"
+  button "The theme" => "Temat";
+  /// PagesDesk · a hint under a field
+  /// placeholders: {current.Name} = current.Name (string)
+  /// shown through Field.hint
+  hint "A copy of {current.Name}, unpublished." => "En kopia av {current.Name}, opublicerad.";
+  /// PagesDesk · a label (a field, a list item, a menu entry) · at most ~33 characters
+  /// shown through Field.label
+  label "Address of the new page" => "Den nya sidans adress";
+  /// PagesDesk · a label (a field, a list item, a menu entry) · at most ~11 characters
+  /// shown through DatePicker.label
+  /// beside: "With drafts", "Open the site", "Stop previewing"
+  label "As of" => "Per datum";
+  /// PagesDesk · a label (a field, a list item, a menu entry) · at most ~15 characters
+  /// shown through DatePicker.label
+  /// beside: "Live until", "Save the schedule", "Make it live now"
+  label "Live from" => "Live från";
+  /// PagesDesk · a label (a field, a list item, a menu entry) · at most ~16 characters
+  /// shown through DatePicker.label
+  /// beside: "Live from", "Save the schedule", "Make it live now"
+  label "Live until" => "Live till";
+  /// PagesDesk · a label (a field, a list item, a menu entry) · at most ~33 characters
+  /// shown through Field.label
+  label "Name of the new version" => "Den nya versionens namn";
+  /// PagesDesk · a label (a field, a list item, a menu entry) · at most ~17 characters
+  /// shown through Switch.label
+  /// beside: "As of", "Open the site", "Stop previewing"
+  label "With drafts" => "Med utkast";
+  /// PagesDesk · placeholder text inside an empty field · at most ~15 characters
+  /// shown through Field.placeholder
+  placeholder "Christmas" => "Jul";
+  /// PagesDesk · placeholder text inside an empty field · at most ~11 characters
+  /// shown through DatePicker.placeholder
+  /// beside: "With drafts", "Open the site", "Stop previewing"
+  placeholder "Today" => "I dag";
+  /// PagesDesk · placeholder text inside an empty field · at most ~21 characters
+  /// shown through Field.placeholder
+  placeholder "christmas-gifts" => "julklappar";
+  /// PagesDesk · a subtitle
+  /// shown through PageHead.subtitle
+  /// beside: "Versions"
+  subtitle "What each page shows, in which version of the site, and when." => "Vad varje sida visar, i vilken version av sajten och när.";
+  /// PagesDesk · text on the page
+  text "A list of links, on every page" => "En lista med länkar, på varje sida";
+  /// PagesDesk · text on the page
+  /// shown through EmptyState.body
+  text "A page gets one with `Region(\"name\", allow: [...])` in its code." => "En sida får en med `Region(\"namn\", allow: [...])` i sin kod.";
+  /// PagesDesk · text on the page
+  /// shown through SectionLabel.text
+  text "Around every page" => "Runt varje sida";
+  /// PagesDesk · text on the page
+  /// beside: "Schedule"
+  text "It is live from the morning of its first date until the morning of its last." => "Den är live från morgonen på det första datumet till morgonen på det sista.";
+  /// PagesDesk · text on the page
+  text "Look" => "Utseende";
+  /// PagesDesk · text on the page
+  text "On every page" => "På varje sida";
+  /// PagesDesk · text on the page
+  text "Open the site" => "Öppna sajten";
+  /// PagesDesk · text on the page
+  /// shown through SectionLabel.text
+  /// beside: "New version"
+  text "Versions of the site" => "Sajtens versioner";
+  /// PagesDesk · text on the page
+  /// beside: "The theme"
+  text "Wears" => "Bär";
+  /// PagesDesk · text on the page
+  /// shown through SectionLabel.text
+  text "What each mail says" => "Vad varje mejl säger";
+  /// PagesDesk · text on the page
+  /// shown through SectionLabel.text
+  text "What each page shows" => "Vad varje sida visar";
+  /// PagesDesk · text on the page
+  text "these" => "de här";
+  /// PagesDesk · text on the page
+  text "this" => "det här";
+  /// PagesDesk · text on the page
+  /// placeholders: {LookName} = LookName(…) (string), {value} = … (string)
+  text "{LookName} has no design for {value}. They stay in the arrangement and are not shown while the version wears it:" => "{LookName} har ingen design för {value}. De ligger kvar i uppställningen men visas inte medan versionen har det utseendet:";
+  /// PagesDesk · a title
+  /// shown through EmptyState.title
+  title "No regions yet" => "Inga ytor ännu";
+  /// PagesDesk · a title
+  /// shown through PageHead.title
+  /// beside: "Versions"
+  title "Pages" => "Sidor";
+
+  // ── PagesInspector ──
+  /// PagesInspector · a control's name for screen readers
+  accessibleName "Dates" => "Datum";
+  /// PagesInspector · a control's name for screen readers
+  /// placeholders: {p.Label} = p.Label (string)
+  accessibleName "The {p.Label} field" => "Fältet {p.Label}";
+  /// PagesInspector · a control's name for screen readers
+  /// placeholders: {p.Label} = p.Label (string)
+  /// beside: "Use these words"
+  accessibleName "{p.Label} — the editor" => "{p.Label} — redigeraren";
+  /// PagesInspector · a control's name for screen readers
+  /// placeholders: {spec.Label} = spec.Label (string)
+  accessibleName "{spec.Label}: its fields" => "{spec.Label}: dess fält";
+  /// PagesInspector · an image's description for screen readers
+  alt "The uploaded picture" => "Den uppladdade bilden";
+  /// PagesInspector · a button's label · at most ~12 characters
+  /// shown through Button.label
+  /// also in PagesMenuEditor
+  button "Change" => "Ändra";
+  /// PagesInspector · a button's label · at most ~9 characters
+  /// shown through Button.label
+  /// beside: "On"
+  button "Off" => "Av";
+  /// PagesInspector · a button's label · at most ~8 characters
+  /// shown through Button.label
+  /// beside: "Off"
+  button "On" => "På";
+  /// PagesInspector · a button's label · at most ~20 characters
+  /// shown through Button.label
+  /// beside: "Shows from", "Shows until"
+  button "Save the dates" => "Spara datumen";
+  /// PagesInspector · a button's label · at most ~21 characters
+  /// shown through Button.label
+  /// beside: "Cancel"
+  button "Use these words" => "Använd den här texten";
+  /// PagesInspector · a hint under a field
+  /// shown through Field.hint
+  /// beside: "Save"
+  hint "A page of the shop, like /coffee, or https://…" => "En sida i butiken, som /kaffe, eller https://…";
+  /// PagesInspector · a hint under a field
+  /// placeholders: {p.MaxLength} = p.MaxLength (int) — {p.MaxLength} is a count: give one text per plural form
+  /// shown through Field.hint
+  /// beside: "Save"
+  hint "At most {p.MaxLength} characters." => "Högst {p.MaxLength} tecken.";
+  /// PagesInspector · a label (a field, a list item, a menu entry) · at most ~16 characters
+  /// shown through DatePicker.label
+  /// beside: "Shows until", "Save the dates"
+  /// also in PagesMenuEditor
+  label "Shows from" => "Visas från";
+  /// PagesInspector · a label (a field, a list item, a menu entry) · at most ~17 characters
+  /// shown through DatePicker.label
+  /// beside: "Shows from", "Save the dates"
+  /// also in PagesMenuEditor
+  label "Shows until" => "Visas till";
+  /// PagesInspector · placeholder text inside an empty field · at most ~33 characters
+  /// shown through DatePicker.placeholder
+  /// beside: "Shows from", "Save the dates"
+  placeholder "For as long as the page" => "Så länge sidan finns";
+  /// PagesInspector · placeholder text inside an empty field · at most ~20 characters
+  /// shown through DatePicker.placeholder
+  /// beside: "Shows until", "Save the dates"
+  /// also in PagesMenuEditor
+  placeholder "From the start" => "Från början";
+  /// PagesInspector · text on the page
+  /// beside: "When it shows", "Shows from"
+  text "It is gone from the morning of its last date." => "Det är borta från morgonen på det sista datumet.";
+  /// PagesInspector · text on the page
+  /// beside: "Shows from", "It is gone from the morning of its last date."
+  text "When it shows" => "När det visas";
+  /// PagesInspector · text on the page
+  /// placeholders: {p.MaxLength} = p.MaxLength (int) — {p.MaxLength} is a count: give one text per plural form
+  /// beside: "16rem", "Use these words"
+  text "Written in Markdown — at most {p.MaxLength} characters." => "Skrivs i Markdown — högst {p.MaxLength} tecken.";
+  /// PagesInspector · text on the page
+  /// beside: "16rem", "Use these words"
+  text "Written in Markdown." => "Skrivs i Markdown.";
+  /// PagesInspector · text on the page
+  /// placeholders: {p.Label} = p.Label (string)
+  text "{p.Label} (optional)" => "{p.Label} (valfritt)";
+
+  // ── PagesMailPreview ──
+  /// PagesMailPreview · a control's name for screen readers
+  accessibleName "Preview of the mail" => "Förhandsvisning av mejlet";
+  /// PagesMailPreview · a control's name for screen readers
+  accessibleName "Show the mail" => "Visa mejlet";
+  /// PagesMailPreview · a control's name for screen readers
+  accessibleName "The mail's plain text" => "Mejlets rena text";
+  /// PagesMailPreview · a button's label · at most ~16 characters
+  /// shown through Button.label
+  /// beside: "Phone", "Wide"
+  button "Plain text" => "Ren text";
+  /// PagesMailPreview · text on the page
+  /// shown through EmptyState.body
+  text "The mail is previewed for something real — once there is one (an order), it shows here." => "Mejlet förhandsvisas för något verkligt – när det finns ett (en order) visas det här.";
+  /// PagesMailPreview · a title
+  /// shown through EmptyState.title
+  title "Nothing to show it with yet" => "Inget att visa det med ännu";
+
+  // ── PagesMenuEditor ──
+  /// PagesMenuEditor · a control's name for screen readers
+  accessibleName "A new entry" => "En ny post";
+  /// PagesMenuEditor · a control's name for screen readers
+  accessibleName "Change the entry" => "Ändra posten";
+  /// PagesMenuEditor · a control's name for screen readers
+  /// placeholders: {title} = title (string)
+  accessibleName "Editing {title}" => "Ändrar {title}";
+  /// PagesMenuEditor · a control's name for screen readers
+  /// placeholders: {value} = … (int), {MenuValue} = MenuValue(…) (string) — {value} is a count: give one text per plural form
+  accessibleName "Entry {value}: {MenuValue}" => { one: "Post {value}: {MenuValue}", other: "Post {value}: {MenuValue}" };
+  /// PagesMenuEditor · a control's name for screen readers
+  /// beside: "Publish"
+  accessibleName "The menu's entries" => "Menyns poster";
+  /// PagesMenuEditor · a button's label · at most ~18 characters
+  /// shown through Button.label
+  button "Add an entry" => "Lägg till en post";
+  /// PagesMenuEditor · a button's label · at most ~12 characters
+  /// shown through Button.label
+  /// beside: "Cancel"
+  button "Add it" => "Lägg till";
+  /// PagesMenuEditor · a button's label · at most ~10 characters
+  /// shown through Button.label
+  /// beside: "Change", "Take out"
+  button "Hide" => "Dölj";
+  /// PagesMenuEditor · a button's label · at most ~13 characters
+  /// shown through Button.label
+  button "Move in" => "Flytta in";
+  /// PagesMenuEditor · a button's label · at most ~14 characters
+  /// shown through Button.label
+  button "Move out" => "Flytta ut";
+  /// PagesMenuEditor · a button's label · at most ~10 characters
+  /// shown through Button.label
+  /// beside: "Change", "Take out"
+  button "Show" => "Visa";
+  /// PagesMenuEditor · a hint under a field
+  /// shown through Field.hint
+  /// beside: "Words", "Shows from", "Save"
+  hint "A page of the shop, like /coffee, or an outside address, https://…" => "En sida i butiken, som /coffee, eller en adress utanför, https://…";
+  /// PagesMenuEditor · a hint under a field
+  /// shown through Field.hint
+  /// beside: "Words of the new entry", "Add it"
+  hint "A page of the shop, or an outside address, https://…" => "En sida i butiken, eller en adress utanför, https://…";
+  /// PagesMenuEditor · a hint under a field
+  /// shown through Field.hint
+  /// beside: "Goes to", "Shows from", "Save"
+  hint "At most 60 characters." => "Högst 60 tecken.";
+  /// PagesMenuEditor · a label (a field, a list item, a menu entry) · at most ~18 characters
+  /// shown through Badge.label
+  label "Another site" => "Annan webbplats";
+  /// PagesMenuEditor · a label (a field, a list item, a menu entry) · at most ~13 characters
+  /// shown through Field.label
+  /// beside: "Words", "Shows from", "Save"
+  label "Goes to" => "Går till";
+  /// PagesMenuEditor · a label (a field, a list item, a menu entry) · at most ~12 characters
+  /// shown through Badge.label
+  label "Hidden" => "Dold";
+  /// PagesMenuEditor · a label (a field, a list item, a menu entry) · at most ~16 characters
+  /// shown through Field.label
+  /// beside: "Words of the new entry", "Add it"
+  label "It goes to" => "Den går till";
+  /// PagesMenuEditor · a label (a field, a list item, a menu entry) · at most ~11 characters
+  /// shown through Field.label
+  /// beside: "Goes to", "Shows from", "Save"
+  label "Words" => "Ord";
+  /// PagesMenuEditor · a label (a field, a list item, a menu entry) · at most ~31 characters
+  /// shown through Field.label
+  /// beside: "It goes to", "Add it"
+  label "Words of the new entry" => "Den nya postens ord";
+  /// PagesMenuEditor · placeholder text inside an empty field · at most ~26 characters
+  /// shown through Field.placeholder
+  /// beside: "Words of the new entry", "Add it"
+  placeholder "/c/christmas-gifts" => "/c/julklappar";
+  /// PagesMenuEditor · placeholder text inside an empty field · at most ~21 characters
+  /// shown through Field.placeholder
+  /// beside: "It goes to", "Add it"
+  placeholder "Christmas gifts" => "Julklappar";
+  /// PagesMenuEditor · placeholder text inside an empty field · at most ~33 characters
+  /// shown through DatePicker.placeholder
+  /// beside: "Shows from"
+  placeholder "For as long as the menu" => "Så länge menyn finns";
+  /// PagesMenuEditor · text on the page
+  text "Opens the entries inside it" => "Öppnar posterna under den";
+  /// PagesMenuEditor · text on the page
+  text "The menu is empty — add an entry." => "Menyn är tom – lägg till en post.";
+
+  // ── PagesPictureUpload ──
+  /// PagesPictureUpload · text on the page
+  text "Upload a photograph…" => "Ladda upp ett foto…";
+
+  // ── PagesPreview ──
+  /// PagesPreview · a control's name for screen readers
+  accessibleName "Preview" => "Förhandsvisning";
+  /// PagesPreview · a button's label · at most ~11 characters
+  /// shown through Button.label
+  /// beside: "Wide"
+  /// also in PagesMailPreview
+  button "Phone" => "Mobil";
+  /// PagesPreview · a button's label · at most ~10 characters
+  /// shown through Button.label
+  /// beside: "Phone"
+  /// also in PagesMailPreview
+  button "Wide" => "Bred";
+  /// PagesPreview · a hint under a field
+  /// shown through Field.hint
+  hint "Type the address of one of these pages." => "Skriv adressen till en av de här sidorna.";
+  /// PagesPreview · a label (a field, a list item, a menu entry) · at most ~10 characters
+  /// shown through Field.label
+  label "Page" => "Sida";
+
+  // ── PagesRegionEditor ──
+  /// PagesRegionEditor · a control's name for screen readers
+  accessibleName "Add a block" => "Lägg till ett block";
+  /// PagesRegionEditor · a control's name for screen readers
+  /// placeholders: {t.Label} = t.Label (string)
+  /// beside: "7.5rem"
+  accessibleName "Add {t.Label}" => "Lägg till {t.Label}";
+  /// PagesRegionEditor · a control's name for screen readers
+  /// placeholders: {title} = title (string)
+  accessibleName "Arranging {title}" => "Ordnar {title}";
+  /// PagesRegionEditor · a control's name for screen readers
+  /// also in PagesMenuEditor
+  accessibleName "Before it can go live" => "Innan det kan bli live";
+  /// PagesRegionEditor · a control's name for screen readers
+  /// placeholders: {value} = … (int), {b.Label} = b.Label (string) — {value} is a count: give one text per plural form
+  accessibleName "Block {value}: {b.Label}" => "Block {value}: {b.Label}";
+  /// PagesRegionEditor · a control's name for screen readers
+  accessibleName "Blocks" => "Block";
+  /// PagesRegionEditor · a control's name for screen readers
+  /// placeholders: {b.Label} = b.Label (string)
+  /// beside: "Up"
+  accessibleName "Fill in {b.Label}" => "Fyll i {b.Label}";
+  /// PagesRegionEditor · a button's label · at most ~17 characters
+  /// shown through Button.label
+  button "Add a block" => "Lägg till ett block";
+  /// PagesRegionEditor · a button's label · at most ~31 characters
+  /// shown through Button.label
+  /// beside: "Publish", "Throw the draft away"
+  /// also in PagesMenuEditor
+  button "Back to the code's own" => "Tillbaka till kodens";
+  /// PagesRegionEditor · a button's label · at most ~10 characters
+  /// shown through Button.label
+  /// beside: "Up"
+  /// also in PagesMenuEditor
+  button "Down" => "Ner";
+  /// PagesRegionEditor · a button's label · at most ~13 characters
+  /// shown through Button.label
+  /// beside: "Throw the draft away", "Back to the code's own"
+  /// also in PagesMenuEditor
+  button "Publish" => "Publicera";
+  /// PagesRegionEditor · a button's label · at most ~14 characters
+  /// shown through Button.label
+  /// also in PagesMenuEditor
+  button "Take out" => "Ta bort";
+  /// PagesRegionEditor · a button's label · at most ~28 characters
+  /// shown through Button.label
+  /// beside: "Publish", "Back to the code's own"
+  /// also in PagesMenuEditor
+  button "Throw the draft away" => "Släng utkastet";
+  /// PagesRegionEditor · a button's label · at most ~8 characters
+  /// shown through Button.label
+  /// beside: "Down"
+  /// also in PagesMenuEditor
+  button "Up" => "Upp";
+  /// PagesRegionEditor · a label (a field, a list item, a menu entry) · at most ~21 characters
+  /// shown through Badge.label
+  /// also in PagesMenuEditor
+  label "Changed in code" => "Ändrat i koden";
+  /// PagesRegionEditor · a label (a field, a list item, a menu entry) · at most ~11 characters
+  /// shown through Badge.label
+  /// also in PagesMenuEditor
+  label "Dated" => "Daterat";
+  /// PagesRegionEditor · a label (a field, a list item, a menu entry) · at most ~28 characters
+  /// shown through Badge.label
+  label "No longer in the app" => "Finns inte längre";
+  /// PagesRegionEditor · a label (a field, a list item, a menu entry) · at most ~11 characters
+  /// shown through Badge.label
+  label "Stays" => "Stannar";
+  /// PagesRegionEditor · note
+  /// shown through note
+  note "Published — customers see it while this version is live." => "Publicerat – kunderna ser det medan den här versionen är live.";
+  /// PagesRegionEditor · text on the page
+  /// also in PagesMenuEditor
+  text "A draft: nobody sees it until you publish it." => "Ett utkast: ingen ser det förrän du publicerar det.";
+  /// PagesRegionEditor · text on the page
+  /// beside: "Cancel"
+  text "Add a block" => "Lägg till ett block";
+  /// PagesRegionEditor · text on the page
+  /// shown through EmptyState.body
+  text "Add one — this region shows nothing until you do." => "Lägg till ett – ytan visar ingenting förrän du gör det.";
+  /// PagesRegionEditor · text on the page
+  /// also in PagesMenuEditor
+  text "Words in" => "Text på";
+  /// PagesRegionEditor · a title
+  /// shown through EmptyState.title
+  title "No blocks" => "Inga block";
+
+  // ── PagesUploadPicture ──
+  /// PagesUploadPicture · text on the page
+  /// shown through PagesUploadPicture()
+  text "A picture is a JPEG, a PNG or a WebP." => "En bild är en JPEG, en PNG eller en WebP.";
+
+  // ── PreviewSentence ──
+  /// PreviewSentence · text on the page
+  /// placeholders: {version} = version (string)
+  /// shown through PreviewSentence()
+  text "Previewing {version} as it is now" => "Förhandsvisar {version} som den är nu";
+  /// PreviewSentence · text on the page
+  /// placeholders: {version} = version (string)
+  /// shown through PreviewSentence()
+  text "Previewing {version} as it is now, with drafts" => "Förhandsvisar {version} som den är nu, med utkast";
+  /// PreviewSentence · text on the page
+  /// placeholders: {version} = version (string), {day} = day (string)
+  /// shown through PreviewSentence()
+  text "Previewing {version} as of {day}" => "Förhandsvisar {version} per {day}";
+  /// PreviewSentence · text on the page
+  /// placeholders: {version} = version (string), {day} = day (string)
+  /// shown through PreviewSentence()
+  text "Previewing {version} as of {day}, with drafts" => "Förhandsvisar {version} per {day}, med utkast";
+
+  // ── RegionState ──
+  /// RegionState · a label (a field, a list item, a menu entry) · at most ~14 characters
+  /// shown through RegionState()
+  label "Arranged" => "Ordnad";
+  /// RegionState · a label (a field, a list item, a menu entry) · at most ~26 characters
+  /// shown through RegionState()
+  label "As the code has it" => "Som i koden";
+  /// RegionState · a label (a field, a list item, a menu entry) · at most ~27 characters
+  /// shown through RegionState()
+  label "Draft not published" => "Utkast ej publicerat";
+
+  // ── SaveBar ──
+  /// SaveBar · a button's label · at most ~10 characters
+  /// shown through Button.label
+  /// beside: "Unsaved changes", "Discard"
+  /// also in PagesInspector
+  /// also in PagesMenuEditor
+  button "Save" => "Spara";
+
+  // ── SaveBlock ──
+  /// SaveBlock · text on the page
+  /// also in PagesUploadPicture
+  text "Only a draft can be changed — open the region to edit it." => "Bara ett utkast kan ändras – öppna ytan för att redigera den.";
+
+  // ── SiteLook ──
+  /// SiteLook · a control's name for screen readers
+  accessibleName "Site preview" => "Förhandsvisning av sajten";
+  /// SiteLook · a button's label · at most ~30 characters
+  /// shown through Button.label
+  /// beside: "Only you see this. Orders and payments are off while you preview."
+  button "Back to the live site" => "Tillbaka till livesajten";
+  /// SiteLook · text on the page
+  /// beside: "Back to the live site"
+  text "Only you see this. Orders and payments are off while you preview." => "Bara du ser detta. Beställningar och betalningar är avstängda medan du förhandsvisar.";
+
+  // ── VersionSentence ──
+  /// VersionSentence · a subtitle
+  /// shown through VersionSentence()
+  subtitle "Customers see this version whenever no scheduled version is live." => "Kunderna ser den här versionen när ingen schemalagd version är live.";
+  /// VersionSentence · a subtitle
+  /// placeholders: {from} = from (string), {until} = until (string)
+  /// shown through VersionSentence()
+  subtitle "Live from {from} until {until}." => "Live från {from} till {until}.";
+  /// VersionSentence · a subtitle
+  /// placeholders: {from} = from (string)
+  /// shown through VersionSentence()
+  subtitle "Live from {from}." => "Live från {from}.";
+  /// VersionSentence · a subtitle
+  /// shown through VersionSentence()
+  subtitle "Not live — only staff previewing it see it." => "Inte live – bara personal som förhandsvisar den ser den.";
+
+  // ── VersionState ──
+  /// VersionState · a button's label · at most ~10 characters
+  /// shown through VersionState()
+  button "Live" => "Live";
+  /// VersionState · a button's label · at most ~14 characters
+  /// shown through VersionState()
+  button "Live now" => "Live nu";
+  /// VersionState · a button's label · at most ~14 characters
+  /// shown through VersionState()
+  button "Not live" => "Inte live";
+  /// VersionState · a button's label · at most ~15 characters
+  /// shown through VersionState()
+  button "Scheduled" => "Schemalagd";
+
+  // ── WhereItIs ──
+  /// WhereItIs · text on the page
+  /// placeholders: {page} = page (string)
+  /// shown through WhereItIs()
+  text "On {page}" => "På {page}";
+  /// WhereItIs · text on the page
+  /// placeholders: {page} = page (string)
+  /// shown through WhereItIs()
+  text "One page per address — {page}" => "En sida per adress – {page}";
+}

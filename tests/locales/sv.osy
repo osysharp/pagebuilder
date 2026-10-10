@@ -1,0 +1,252 @@
+// sv (Svenska): the words of PagesKitTests, translated.
+// Written and kept in step with the source by `osy translate`: a new text arrives as `=> null`, a text
+// whose source changed keeps its old translation in a `was` clause. The words are yours to edit.
+// Source language: en.
+
+translations sv {
+  // ── ArrangedCount ──
+  /// ArrangedCount · a control's name for screen readers
+  accessibleName "Arranged count" => "Antal ordnade";
+  /// ArrangedCount · text on the page
+  /// placeholders: {r.Name} = r.Name (string), {mine.Count} = mine.Count (int) — {mine.Count} is a count: give one text per plural form
+  text "{r.Name}: {mine.Count} arranged" => "{r.Name}: {mine.Count} ordnade";
+
+  // ── Campaign (/c/{slug}) ──
+  /// Campaign · /c/{slug} · text on the page
+  /// shown through EmptyState.body
+  text "It may have ended, or never started." => "Den kan ha tagit slut, eller aldrig börjat.";
+  /// Campaign · /c/{slug} · a title
+  /// shown through EmptyState.title
+  title "This page is not here" => "Den här sidan finns inte";
+
+  // ── Front (/) ──
+  /// Front · / · text on the page
+  text "The Corner Café" => "Hörnkaféet";
+
+  // ── Headline ──
+  /// Headline · a control's name for screen readers
+  accessibleName "Headline" => "Rubrik";
+  /// Headline · text on the page
+  text "See the menu" => "Se menyn";
+
+  // ── Menu (/menu) ──
+  /// Menu · /menu · text on the page
+  text "The menu" => "Menyn";
+
+  // ── Osysharp.Blocks · DraftProblems ──
+  /// DraftProblems · text on the page
+  /// placeholders: {label} = label (string)
+  text "{label} has to be in it — add it back." => "{label} måste finnas med – lägg tillbaka den.";
+
+  // ── Osysharp.Blocks · PlaceholderRefusal ──
+  /// PlaceholderRefusal · text on the page
+  /// placeholders: {named} = named (string)
+  text "{named} is not a placeholder this mail fills — it offers none." => "{named} är ingen platshållare som det här mejlet fyller i – det erbjuder inga.";
+  /// PlaceholderRefusal · text on the page
+  /// placeholders: {named} = named (string), {offered} = offered (string)
+  text "{named} is not a placeholder this mail fills — it offers {offered}." => "{named} är ingen platshållare som det här mejlet fyller i – det erbjuder {offered}.";
+
+  // ── Osysharp.Blocks · RemoveBlock ──
+  /// RemoveBlock · an error message
+  /// placeholders: {label} = label (string)
+  /// shown through ValidationException
+  error "{label} stays — this region must keep it. Move it where you want it instead." => "{label} stannar – den här delen måste ha den kvar. Flytta den dit du vill i stället.";
+
+  // ── Osysharp.EmailTemplates · EmailLayout ──
+  /// EmailLayout · a link or button in an email · at most ~17 characters
+  mailLink "Unsubscribe" => "Avsluta prenumerationen";
+
+  // ── Osysharp.EmailTemplates · __BlockSpec_EmailAction ──
+  /// __BlockSpec_EmailAction · text on the page
+  text "A button to a page of the shop, or to another address." => "En knapp till en sida i butiken eller till en annan adress.";
+  /// __BlockSpec_EmailAction · text on the page
+  text "Button" => "Knapp";
+  /// __BlockSpec_EmailAction · text on the page
+  text "What it says" => "Vad den säger";
+  /// __BlockSpec_EmailAction · text on the page
+  text "Where it goes" => "Vart den leder";
+
+  // ── Osysharp.EmailTemplates · __BlockSpec_EmailHeadline ──
+  /// __BlockSpec_EmailHeadline · text on the page
+  text "A heading with a paragraph under it." => "En rubrik med ett stycke under.";
+  /// __BlockSpec_EmailHeadline · text on the page
+  text "Heading" => "Rubrik";
+  /// __BlockSpec_EmailHeadline · text on the page
+  text "Heading and words" => "Rubrik och ord";
+
+  // ── Osysharp.EmailTemplates · __BlockSpec_EmailPicture ──
+  /// __BlockSpec_EmailPicture · text on the page
+  text "A photograph across the mail — one of the shop's, or one you upload." => "Ett fotografi över hela mejlet – ett av butikens eller ett du laddar upp.";
+  /// __BlockSpec_EmailPicture · text on the page
+  text "Photograph" => "Fotografi";
+  /// __BlockSpec_EmailPicture · text on the page
+  text "Picture" => "Bild";
+  /// __BlockSpec_EmailPicture · text on the page
+  text "Read aloud to a reader who cannot see it." => "Läses upp för en läsare som inte kan se den.";
+  /// __BlockSpec_EmailPicture · text on the page
+  text "What it shows" => "Vad den visar";
+
+  // ── Osysharp.EmailTemplates · __BlockSpec_EmailQuote ──
+  /// __BlockSpec_EmailQuote · text on the page
+  text "Quote" => "Citat";
+  /// __BlockSpec_EmailQuote · text on the page
+  text "What they said" => "Vad de sa";
+  /// __BlockSpec_EmailQuote · text on the page
+  text "Words somebody said, and who said them." => "Något någon sa, och vem som sa det.";
+
+  // ── Osysharp.EmailTemplates · __BlockSpec_EmailSmallPrint ──
+  /// __BlockSpec_EmailSmallPrint · text on the page
+  text "A quiet line at the foot of the mail." => "En stilla rad längst ned i mejlet.";
+  /// __BlockSpec_EmailSmallPrint · text on the page
+  text "Small print" => "Finstilt";
+
+  // ── Osysharp.EmailTemplates · __BlockSpec_EmailWords ──
+  /// __BlockSpec_EmailWords · text on the page
+  text "A paragraph — bold, italics and links. It may use the mail's {placeholders}." => "Ett stycke – fetstil, kursiv och länkar. Det får använda mejlets {placeholders}.";
+  /// __BlockSpec_EmailWords · text on the page
+  text "Use the mail's placeholders, such as {customer.name}." => "Använd mejlets platshållare, till exempel {customer.name}.";
+
+  // ── Osysharp.Ui · WeekdayRow ──
+  /// WeekdayRow · text on the page
+  text "F" key "weekday-initial-friday" => null;
+  /// WeekdayRow · text on the page
+  text "M" key "weekday-initial-monday" => null;
+  /// WeekdayRow · text on the page
+  text "S" key "weekday-initial-saturday" => null;
+  /// WeekdayRow · text on the page
+  text "S" key "weekday-initial-sunday" => null;
+  /// WeekdayRow · text on the page
+  text "T" key "weekday-initial-tuesday" => null;
+  /// WeekdayRow · text on the page
+  text "T" key "weekday-initial-thursday" => null;
+  /// WeekdayRow · text on the page
+  text "W" key "weekday-initial-wednesday" => null;
+
+  // ── ShelfNote ──
+  /// ShelfNote · a control's name for screen readers
+  accessibleName "Shelf note" => "Hyllnotis";
+  /// ShelfNote · note
+  /// shown through ShelfNote.note
+  note "On the shelf today" => "På hyllan i dag";
+  /// ShelfNote · text on the page
+  text "nothing yet" => "ingenting ännu";
+
+  // ── SignInPage (/sign-in) ──
+  /// SignInPage · /sign-in · a button's label · at most ~13 characters
+  /// shown through Button.label
+  /// beside: "Email", "Password"
+  button "Sign in" => "Logga in";
+  /// SignInPage · /sign-in · a label (a field, a list item, a menu entry) · at most ~11 characters
+  /// shown through Field.label
+  /// beside: "Password", "Sign in"
+  label "Email" => "E-post";
+  /// SignInPage · /sign-in · a label (a field, a list item, a menu entry) · at most ~14 characters
+  /// shown through Field.label
+  /// beside: "Email", "Sign in"
+  label "Password" => "Lösenord";
+  /// SignInPage · /sign-in · text on the page
+  /// shown through problem
+  text "That did not match." => "Det stämde inte.";
+
+  // ── WelcomeMail ──
+  /// WelcomeMail · an image's description for screen readers
+  /// shown through EmailLayout.brand
+  alt "The Corner Café" => "The Corner Café";
+  /// WelcomeMail · an email's subject line
+  mailSubject "Welcome to the Corner Café" => "Välkommen till The Corner Café";
+  /// WelcomeMail · text in an email
+  /// shown through EmailLayout.address
+  mailText "Storgatan 1, Stockholm" => "Storgatan 1, Stockholm";
+  /// WelcomeMail · text on the page
+  /// shown through EmailHeading.text
+  text "Welcome" => "Välkommen";
+
+  // ── __BlockSample ──
+  /// __BlockSample · text on the page
+  /// also in __BlockSpec_Headline
+  text "Headline" => "Rubrik";
+  /// __BlockSample · text on the page
+  /// also in __BlockSpec_ShelfNote
+  /// also in __RegionSpec_Front
+  text "On the shelf today" => "På hyllan i dag";
+  /// __BlockSample · text on the page
+  /// also in __BlockSpec_Headline
+  text "Words under it" => "Text under den";
+
+  // ── __BlockSpec_EmailQuote ──
+  /// __BlockSpec_EmailQuote · text on the page
+  /// also in __BlockSpec_Headline
+  text "Ground" => "Bakgrund";
+  /// __BlockSpec_EmailQuote · text on the page
+  /// also in __MailBlockSample
+  text "Who said it" => "Vem som sa det";
+
+  // ── __BlockSpec_EmailWords ──
+  /// __BlockSpec_EmailWords · text on the page
+  /// also in __BlockSpec_EmailHeadline
+  /// also in __BlockSpec_EmailSmallPrint
+  text "Words" => "Text";
+
+  // ── __BlockSpec_Headline ──
+  /// __BlockSpec_Headline · text on the page
+  text "A headline over a photograph." => "En rubrik över ett foto.";
+  /// __BlockSpec_Headline · text on the page
+  text "A sentence or two." => "En mening eller två.";
+  /// __BlockSpec_Headline · text on the page
+  text "Bold" => "Fet";
+  /// __BlockSpec_Headline · text on the page
+  text "Light" => "Lätt";
+  /// __BlockSpec_Headline · text on the page
+  text "Link" => "Länk";
+  /// __BlockSpec_Headline · text on the page
+  text "Photo" => "Foto";
+  /// __BlockSpec_Headline · text on the page
+  text "Weight" => "Tyngd";
+
+  // ── __BlockSpec_ShelfNote ──
+  /// __BlockSpec_ShelfNote · text on the page
+  text "Shelf" => "Hylla";
+  /// __BlockSpec_ShelfNote · text on the page
+  text "Shelf note" => "Hyllnotis";
+  /// __BlockSpec_ShelfNote · text on the page
+  text "What is on one shelf, in a sentence." => "Vad som finns på en hylla, i en mening.";
+
+  // ── __MailBlockSample ──
+  /// __MailBlockSample · text on the page
+  text "A photograph" => "Ett fotografi";
+  /// __MailBlockSample · text on the page
+  text "See what is new" => "Se vad som är nytt";
+  /// __MailBlockSample · text on the page
+  text "Thank you — your order is on its way to being packed." => "Tack – din order är på väg att packas.";
+  /// __MailBlockSample · text on the page
+  text "The best cup of the week, every week." => "Veckans bästa kopp, varje vecka.";
+
+  // ── __RegionSpec_Campaign ──
+  /// __RegionSpec_Campaign · text on the page
+  text "Something new" => "Något nytt";
+
+  // ── __RegionSpec_Front ──
+  /// __RegionSpec_Front · text on the page
+  text "Coffee roasted on Tuesdays" => "Kaffe rostat på tisdagar";
+  /// __RegionSpec_Front · text on the page
+  text "Come in for a cup." => "Kom in på en kopp.";
+
+  // ── __RegionSpec_Welcome ──
+  /// __RegionSpec_Welcome · the default wording of an email paragraph staff can edit (Markdown, keep {placeholders})
+  mailWords "Welcome to the corner, **{member.email}** — the first cup is on us." => "Välkommen till hörnet, **{member.email}** – första koppen bjuder vi på.";
+
+  // ── __SiteBlocks.Site ──
+  /// __SiteBlocks.Site · a label (a field, a list item, a menu entry) · at most ~17 characters
+  /// shown through BlockChoice.Label
+  label "Chemex pour" => "Chemex-bryggning";
+  /// __SiteBlocks.Site · text on the page
+  text "Berry" => "Bär";
+  /// __SiteBlocks.Site · text on the page
+  text "Crema" => "Crema";
+  /// __SiteBlocks.Site · text on the page
+  text "Espresso" => "Espresso";
+  /// __SiteBlocks.Site · text on the page
+  text "Foam" => "Mjölkskum";
+  /// __SiteBlocks.Site · text on the page
+  text "Muted" => "Dämpad";
+}

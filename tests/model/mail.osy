@@ -1,0 +1,26 @@
+// The café's welcome mail — its words are a region staff arrange at the same desk as the front page.
+
+using Osysharp.EmailTemplates;
+
+[Email]
+public component WelcomeMail(Member member) {
+  subject => "Welcome to the Corner Café";
+  placeholders {
+    member.email => member.Email;
+  }
+  render {
+    EmailLayout("The Corner Café", address: "Storgatan 1, Stockholm") {
+      EmailHeading("Welcome");
+      Region("welcome", allow: [EmailWords, EmailQuote, EmailPicture, EmailAction], sample: WelcomeSample) {
+        EmailWords(words: "Welcome to the corner, **{member.email}** — the first cup is on us.");
+      }
+    }
+  }
+}
+
+/// The welcome mail for a member (the last by address), in `language` — what the desk shows beside the region's blocks.
+[Authorize(IsStaff)]
+public RenderedEmail? WelcomeSample(string language) {
+  var member = Member.OrderByDescending(m => m.Email).FirstOrDefault();
+  return member == null ? null : WelcomeMail(member, language: language);
+}

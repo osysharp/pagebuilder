@@ -1,0 +1,64 @@
+// The site's look, on every page — put `SiteLook();` once in the app's layout.
+//
+// For everybody it dresses the page in the live site version's LOOK (its own theme, when the app has looks) and THEME
+// VARIANT (a Christmas palette the theme declares), over whichever of light and dark the visitor has. For a member of staff previewing the site — a version, a date,
+// drafts — it shows the banner that says so on every page, with the way back to the real site.
+
+namespace Osysharp.PageBuilder;
+
+using Osysharp.Blocks;
+
+/// The live version's theme variant for everyone, and — while a member of staff previews the site — the banner saying
+/// what they are looking at. Put it once in the layout, above the page.
+[Composable]
+public component SiteLook() {
+  string visit = Visitor.Id;
+  live var versions = SiteVersion.ToList();
+  live var previews = SitePreview.Where(p => p.VisitId == visit).ToList();
+  // The look the site wears where a version names none (`app.Look`); "" for an app with one design, or until asked.
+  string appLook = "";
+  bool askedLook = false;
+
+  on mount {
+    appLook = SiteDefaultLook();
+    askedLook = true;
+  }
+
+  // The variant and the LOOK follow the data: a version switched on, a schedule starting, a preview begun or stopped.
+  // The server already painted the live version's (`data-variant`, `data-look` on the page), so nothing is applied until
+  // the versions have been read — an empty first answer would take the Christmas look off for a moment and put it back.
+  on change {
+    if (versions.Count > 0) {
+      var now = SiteLookOf(versions, previews, DateTime.UtcNow);
+      Theme.Variant(now.ThemeVariant);
+      if (askedLook) { Theme.Look(now.Look != "" ? now.Look : appLook); }
+    }
+  }
+
+  action Stop() { StopSitePreview(); }
+
+  render {
+    var look = SiteLookOf(versions, previews, DateTime.UtcNow);
+    if (look.Previewing) {
+      Row(justify: Justify.Between, align: Align.Center, gap: 3, wrap: Wrapping.Wrap, px: 4, py: 2,
+          bg: Colors.Warning.Subtle, color: Colors.Warning[900], borderBW: 1, border: Colors.Warning, role: UiRole.Status,
+          label: "Site preview") {
+        Text(PreviewSentence(look), fontSize: FontSize.Label, fontWeight: FontWeight.Semibold);
+        Row(gap: 3, align: Align.Center) {
+          Text("Only you see this. Orders and payments are off while you preview.", fontSize: FontSize.Label);
+          Button("Back to the live site", onPress: Stop, size: Size.Sm);
+        }
+      }
+    }
+  }
+}
+
+/// "Previewing Christmas as of 24 Dec 2026, with drafts".
+string PreviewSentence(SiteLookView look) {
+  var version = look.Version;
+  if (look.At == null) {
+    return look.WithDrafts ? $"Previewing {version} as it is now, with drafts" : $"Previewing {version} as it is now";
+  }
+  var day = look.At.Value.ToString("d MMM yyyy");
+  return look.WithDrafts ? $"Previewing {version} as of {day}, with drafts" : $"Previewing {version} as of {day}";
+}
