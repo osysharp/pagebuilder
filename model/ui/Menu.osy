@@ -117,7 +117,7 @@ public component PagesMenuEditor(Guid versionId, string region, Action onClose) 
       if (draft != null) {
         Box(display: Display.Grid, cols: "repeat(auto-fit, minmax(22rem, 1fr))", gap: 6, align: Align.Start) {
           Stack(gap: 3) {
-            Stack(gap: 0, role: UiRole.List, label: "The menu's entries", borderW: 1, border: Colors.Border, rounded: Radius.Md, bg: Colors.Surface) {
+            Stack(gap: 0, role: (draft.Blocks.Count == 0) ? UiRole.Group : UiRole.List, label: "The menu's entries", borderW: 1, border: Colors.Border, rounded: Radius.Md, bg: Colors.Surface) {
               if (draft.Blocks.Count == 0) { Box(p: 4) { Text("The menu is empty — add an entry.", color: Colors.TextMuted); } }
               foreach (var b in draft.Blocks) {
                 var inside = MenuValue(b, "inside") == "true";

@@ -13,7 +13,7 @@ using Osysharp.Blocks;
 [Composable]
 public component SiteLook() {
   string visit = Visitor.Id;
-  live var versions = SiteVersion.ToList();
+  live var versions = SiteVersion.OrderBy(v => v.Name).Take(100).ToList();
   live var previews = SitePreview.Where(p => p.VisitId == visit).ToList();
   // The look the site wears where a version names none (`app.Look`); "" for an app with one design, or until asked.
   string appLook = "";

@@ -123,7 +123,7 @@ component Menu() {
 [Layout(Site)]
 [AllowAnonymous]
 component Campaign(string slug) {
-  live var page = RegionArrangement.Where(a => a.Region == "campaign" && a.Key == slug).ToList();
+  live var page = RegionArrangement.Where(a => a.Region == "campaign" && a.Key == slug).Take(50).ToList();
   render {
     if (page.Count == 0) {
       EmptyState("This page is not here", body: "It may have ended, or never started.");

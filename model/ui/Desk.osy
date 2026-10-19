@@ -26,8 +26,10 @@ public component PagesDesk() {
   List<BlockSpec> types = [];
   List<RegionSpec> regions = [];
   SiteSpec site = new SiteSpec();
-  live var versions = SiteVersion.OrderBy(v => v.Name).ToList();
-  live var arrangements = RegionArrangement.Include(a => a.Version).ToList();
+  // A site's versions are a few the staff name; the first hundred, and their arrangements.
+  live var versions = SiteVersion.OrderBy(v => v.Name).Take(100).ToList();
+  live var versionIds = versions.Select(v => v.Id).ToList();
+  live var arrangements = RegionArrangement.Include(a => a.Version).Where(a => versionIds.Contains(a.Version.Id)).ToList();
   Guid? versionId = null;
   // The region being arranged ("" when none), its key (a campaign page's slug), and the page it is on.
   string arranging = "";
