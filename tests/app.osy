@@ -3,7 +3,7 @@
 app PagesKitTests {
   model "model/**/*.osy";
   tests "**/*.test.osy";
-  use Osysharp.PageBuilder@0;
+  use Osysharp.PageBuilder@1;
   use Osysharp.Blocks;
   // The welcome mail (model/mail.osy) — a mail's region is arranged at the same desk.
   use Osysharp.EmailTemplates@0;

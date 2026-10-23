@@ -4,8 +4,8 @@
 //
 // The mechanism is the platform's (`[Block]`, `Region`, `Osysharp.Blocks`); this is the desk over it.
 package Osysharp.PageBuilder {
-  version "0.3.0";
-  minPlatform "0.14.0";
+  version "1.0.0";
+  minPlatform "0.15.0";
   summary     "the page desk: arrange each Region's blocks with generated forms and a live preview, site versions on a schedule, and a staff preview of the whole site.";
   model "model/**/*.osy";
   use Osysharp.Ui;

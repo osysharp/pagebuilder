@@ -73,6 +73,9 @@ public component PagesDesk() {
     if (versionId == null) { return; }
     try {
       versionId = DuplicateVersion(versionId.Value, newName);
+      // The copy is another version, so an open region editor is closed — as picking a version does. Left open it
+      // went on editing the ORIGINAL's draft under the copy's name.
+      arranging = "";
       naming = false;
       liveFrom = null;
       liveUntil = null;
@@ -328,8 +331,11 @@ public component PagesDesk() {
         if (shown.Any(r => r.Name == arranging && r.Menu)) {
           PagesMenuEditor(current.Id, arranging, CloseEditor);
         } else {
+          // `key:` — the editor opens its region's draft ON MOUNT, so it is one instance per region and key: if the region
+          // ever changes while it is open (today the list is hidden while arranging), it starts over rather than keeping
+          // the previous region's draft.
           PagesRegionEditor(current.Id, arranging, arrangingKey, arrangingPage, types, arrangingAllow, site, CloseEditor, mail: arrangingMail,
-                            look: look);
+                            look: look, key: arranging + "/" + arrangingKey);
         }
       }
     }
@@ -406,7 +412,7 @@ string Words(string name) {
 /// published when it is right. Opening it makes a draft (from what is live, or from the code's default) and starts a
 /// preview with drafts for this browser, so the page beside it shows the draft as it changes.
 [Composable]
-public component PagesRegionEditor(Guid versionId, string region, string key, string page, List<BlockSpec> types,
+public component PagesRegionEditor(Guid versionId, string region, string regionKey, string page, List<BlockSpec> types,
     List<string> allow, SiteSpec site, Action onClose, bool mail = false, string look = "") {
   Guid? draftId = null;
   DraftView? draft = null;
@@ -425,7 +431,7 @@ public component PagesRegionEditor(Guid versionId, string region, string key, st
 
   on mount {
     language = Session.Language;
-    draftId = EditRegion(versionId, region, key);
+    draftId = EditRegion(versionId, region, regionKey);
     StartSitePreview(versionId, null, true);
     Reload();
   }
@@ -471,7 +477,7 @@ public component PagesRegionEditor(Guid versionId, string region, string key, st
     if (refusal != "") { note = refusal; noteIsProblem = true; Reload(); return; }
     note = "Published — customers see it while this version is live.";
     noteIsProblem = false;
-    draftId = EditRegion(versionId, region, key);
+    draftId = EditRegion(versionId, region, regionKey);
     Reload();
   }
   action Discard() {
@@ -479,7 +485,7 @@ public component PagesRegionEditor(Guid versionId, string region, string key, st
     onClose();
   }
   action BackToCode() {
-    ResetRegion(versionId, region, key);
+    ResetRegion(versionId, region, regionKey);
     onClose();
   }
 

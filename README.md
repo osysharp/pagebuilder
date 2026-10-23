@@ -41,7 +41,7 @@ publish. No deploy, and nothing a customer sees changes until they press Publish
 ```osy
 // app.osy
 use Osysharp.Blocks;
-use Osysharp.PageBuilder@0;
+use Osysharp.PageBuilder@1;
 ```
 
 ```osy
