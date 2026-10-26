@@ -75,3 +75,92 @@ dates are never shown to them, whatever reads the tables.
 The shop's blocks (a hero, a product row, the shelves, a picture with words, a quote, the newsletter, a banner) are in
 [Osysharp.Shop](https://osyrin.com/templates/kits/shop/) (`model/ui/Blocks.osy`); the Grounds & Grapes demo store arranges its front page,
 its product pages and its campaign pages with them. How blocks are declared is `osy docs ui-blocks`.
+
+## Examples
+
+Taken from this package's own tests, which compile and run on every release.
+
+```osy
+using Osysharp.Blocks;
+using Osysharp.PageBuilder;
+
+[Test(Cafe)]
+void a_region_is_edited_as_a_draft_and_published() {
+  runas (Anna) {
+    var draft = EditRegion(MainVersion().Id, "front", "");
+    var note = AddBlock(draft, "ShelfNote", 0);
+    Assert.Equal("", SaveBlockValue(note, "en", new BlockValue { Name = "note", Text = "Fresh today" }));
+    Assert.Equal("", SaveBlockValue(note, "en", new BlockValue { Name = "shelf", Ref = Shelf.Single(s => s.Name == "Cakes").Id }));
+    Assert.Equal("", PublishRegion(draft));
+  }
+  var front = ArrangedRegion("front", "");
+  Assert.True(front.Arranged);
+  Assert.Equal(3, front.Blocks.Count);
+  Assert.Equal("ShelfNote", front.Blocks[0].Block);
+  Assert.Equal("Fresh today", front.Blocks[0].Values.Single(v => v.Name == "note").Text);
+}
+```
+
+From [`tests/pages.test.osy`](tests/pages.test.osy).
+
+```osy
+using Osysharp.Blocks;
+using Osysharp.PageBuilder;
+
+[Test(Cafe)]
+void a_value_that_is_not_its_parameters_kind_is_refused_by_name() {
+  runas (Anna) {
+    var draft = EditRegion(MainVersion().Id, "front", "");
+    var hero = AddBlock(draft, "Headline", 0);
+    Assert.Equal("Headline needs filling in.", SaveBlockValue(hero, "en", new BlockValue { Name = "title", Text = " " }));
+    Assert.Equal("Ground: choose one of the theme's colours.", SaveBlockValue(hero, "en", new BlockValue { Name = "ground", Text = "#ff00ff" }));
+    Assert.Equal("Weight: choose one of Light, Bold.", SaveBlockValue(hero, "en", new BlockValue { Name = "weight", Text = "Heavy" }));
+    Assert.Equal("Photo: choose a picture the shop has, or upload one.",
+      SaveBlockValue(hero, "en", new BlockValue { Name = "photo", Text = "https://elsewhere.example/cat.jpg" }));
+    Assert.Equal("Link: the shop has no page at /nowhere.", SaveBlockValue(hero, "en", new BlockValue { Name = "link", Text = "/nowhere" }));
+    Assert.Equal("", SaveBlockValue(hero, "en", new BlockValue { Name = "link", Text = "/c/christmas-gifts" }));
+    Assert.Equal("Link: a page of the shop starts with /, an outside address with https://.",
+      SaveBlockValue(hero, "en", new BlockValue { Name = "link", Text = "javascript:alert(1)" }));
+    Assert.Equal("", SaveBlockValue(hero, "en", new BlockValue { Name = "title", Text = "Christmas at the corner" }));
+    Assert.Equal("", SaveBlockValue(hero, "en", new BlockValue { Name = "ground", Text = "Berry" }));
+  }
+}
+```
+
+From [`tests/pages.test.osy`](tests/pages.test.osy).
+
+```osy
+using Osysharp.Blocks;
+using Osysharp.PageBuilder;
+
+[Test(Cafe)]
+void schedules_may_not_overlap_and_the_scheduled_version_is_what_customers_see() {
+  runas (Anna) {
+    var main = MainVersion();
+    var christmas = DuplicateVersion(main.Id, "Christmas");
+    var draft = EditRegion(christmas, "front", "");
+    var hero = AddBlock(draft, "Headline", 0);
+    SaveBlockValue(hero, "en", new BlockValue { Name = "title", Text = "Merry from the corner" });
+    Assert.Equal("", PublishRegion(draft));
+    Assert.Equal("", ScheduleVersion(christmas, DateTime.UtcNow.AddDays(-1), DateTime.UtcNow.AddDays(20)));
+    var summer = DuplicateVersion(main.Id, "Summer");
+    Assert.Contains("overlaps Christmas", ScheduleVersion(summer, DateTime.UtcNow.AddDays(10), DateTime.UtcNow.AddDays(40)));
+    Assert.Equal("", ScheduleVersion(summer, DateTime.UtcNow.AddDays(20), DateTime.UtcNow.AddDays(40)));
+    Assert.Contains("the main version", ScheduleVersion(main.Id, DateTime.UtcNow, null));
+  }
+  Assert.Equal("Merry from the corner", ArrangedRegion("front", "").Blocks[0].Values.Single(v => v.Name == "title").Text);
+}
+```
+
+From [`tests/pages.test.osy`](tests/pages.test.osy).
+
+## Learn more
+
+- [The Osysharp.PageBuilder reference](https://osysharp.com/reference/ui/pages-kit/)
+- [Osysharp.PageBuilder in the package catalogue](https://osysharp.com/packages/#osysharp-pagebuilder)
+- [The Osy# reference](https://osysharp.com/reference/) — the language, the runtime and every kit
+- [`llms-full.txt`](https://osysharp.com/llms-full.txt) — the whole reference and specification as one Markdown file, for a coding agent
+
+## Licence
+
+MIT — see [`LICENSE`](LICENSE).
