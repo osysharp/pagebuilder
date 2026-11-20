@@ -63,7 +63,9 @@ public enum Weight { Light, Bold }
 component Headline([Label("Headline"), MaxLength(80)] string title, [Label("Words under it"), Hint("A sentence or two.")] Markdown body = "",
     Picture photo = Textures.ChemexPour, Color ground = Colors.Foam, Weight weight = Weight.Bold, PageLink link = "/menu") {
   render {
-    Box(display: Display.Grid, cols: "minmax(0, 1fr) minmax(0, 1fr)", bg: ground, label: "Headline") {
+    // Photograph beside the words from a tablet up; on a phone, the photograph over them.
+    Box(display: Display.Grid, cols: Layout.AtLeast(Tablet) ? "minmax(0, 1fr) minmax(0, 1fr)" : "minmax(0, 1fr)", bg: ground,
+        label: "Headline") {
       Image(picture: photo, alt: title, w: "100%", h: "100%", minH: "280px", objectFit: ObjectFit.Cover);
       Stack(gap: 3, p: 8, justify: Justify.Center) {
         Text(title, fontSize: FontSize.Title, fontWeight: weight == Weight.Bold ? FontWeight.Bold : FontWeight.Regular, color: Colors.Espresso);

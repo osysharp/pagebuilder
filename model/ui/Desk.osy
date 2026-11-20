@@ -509,7 +509,7 @@ public component PagesRegionEditor(Guid versionId, string region, string regionK
       }
       if (note != "") { Alert(note, tone: noteIsProblem ? Tone.Danger : Tone.Success); }
       if (draft != null) {
-        Box(display: Display.Grid, cols: "repeat(auto-fit, minmax(22rem, 1fr))", gap: 6, align: Align.Start) {
+        Box(display: Display.Grid, cols: "repeat(auto-fit, minmax(min(22rem, 100%), 1fr))", gap: 6, align: Align.Start) {
           // The blocks, in order, and the one being filled in.
           Stack(gap: 3, label: "Blocks") {
             if (draft.Blocks.Count == 0) { EmptyState("No blocks", body: "Add one — this region shows nothing until you do."); }

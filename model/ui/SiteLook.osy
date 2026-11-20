@@ -44,7 +44,7 @@ public component SiteLook() {
           bg: Colors.Warning.Subtle, color: Colors.Warning[900], borderBW: 1, border: Colors.Warning, role: UiRole.Status,
           label: "Site preview") {
         Text(PreviewSentence(look), fontSize: FontSize.Label, fontWeight: FontWeight.Semibold);
-        Row(gap: 3, align: Align.Center) {
+        Row(gap: 3, align: Align.Center, wrap: Wrapping.Wrap, minW: "0") {
           Text("Only you see this. Orders and payments are off while you preview.", fontSize: FontSize.Label);
           Button("Back to the live site", onPress: Stop, size: Size.Sm);
         }
